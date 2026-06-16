@@ -1,0 +1,7 @@
+---
+collections: []
+
+roles:
+  - name: jahrik.alacritty
+  - name: jahrik.nvim
+  - name: jahrik.zsh

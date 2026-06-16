@@ -1,0 +1,25 @@
+---
+galaxy_info:
+  role_name: steamdeck
+  author: jahrik
+  namespace: jahrik
+  description: Configures a Steam Deck with alacritty, zsh, and nvim
+  company: https://homelab.business
+  issue_tracker_url: https://github.com/jahrik/ansible-steamdeck/issues
+  min_ansible_version: '2.16'
+  license: GPLv2
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - steamdeck
+    - steamos
+    - alacritty
+    - zsh
+    - nvim
+
+dependencies:
+  - role: jahrik.alacritty
+  - role: jahrik.zsh
+  - role: jahrik.nvim

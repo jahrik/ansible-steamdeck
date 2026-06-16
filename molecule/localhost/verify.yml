@@ -1,0 +1,31 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check alacritty binary exists
+      ansible.builtin.command: which alacritty
+      register: alacritty_bin
+      changed_when: false
+
+    - name: Assert alacritty is installed
+      ansible.builtin.assert:
+        that: alacritty_bin.rc == 0
+
+    - name: Check zsh binary exists
+      ansible.builtin.command: which zsh
+      register: zsh_bin
+      changed_when: false
+
+    - name: Assert zsh is installed
+      ansible.builtin.assert:
+        that: zsh_bin.rc == 0
+
+    - name: Check nvim binary exists
+      ansible.builtin.command: which nvim
+      register: nvim_bin
+      changed_when: false
+
+    - name: Assert nvim is installed
+      ansible.builtin.assert:
+        that: nvim_bin.rc == 0
