@@ -3,32 +3,72 @@
   hosts: all
   gather_facts: false
   tasks:
-    - name: Check alacritty binary
+    - name: Stat ~/.local/share/fonts/DejaVuSansMNerdFontMono-Regular.ttf
       ansible.builtin.stat:
-        path: /usr/bin/alacritty
+        path: ~/.local/share/fonts/DejaVuSansMNerdFontMono-Regular.ttf
+      register: nerd_font
+
+    - name: Assert Nerd Font is installed
+      ansible.builtin.assert:
+        that: nerd_font.stat.exists
+        fail_msg: "~/.local/share/fonts/DejaVuSansMNerdFontMono-Regular.ttf not found"
+
+    - name: Stat ~/.local/bin/alacritty
+      ansible.builtin.stat:
+        path: ~/.local/bin/alacritty
       register: alacritty_bin
 
-    - name: Assert alacritty is installed
+    - name: Assert alacritty binary exists
       ansible.builtin.assert:
         that: alacritty_bin.stat.exists
-        fail_msg: "alacritty binary not found at /usr/bin/alacritty"
+        fail_msg: "~/.local/bin/alacritty not found"
 
-    - name: Check zsh binary
+    - name: Stat ~/.config/alacritty/alacritty.toml
       ansible.builtin.stat:
-        path: /usr/bin/zsh
+        path: ~/.config/alacritty/alacritty.toml
+      register: alacritty_cfg
+
+    - name: Assert alacritty config exists
+      ansible.builtin.assert:
+        that: alacritty_cfg.stat.exists
+        fail_msg: "~/.config/alacritty/alacritty.toml not found"
+
+    - name: Stat ~/.local/bin/zsh
+      ansible.builtin.stat:
+        path: ~/.local/bin/zsh
       register: zsh_bin
 
-    - name: Assert zsh is installed
+    - name: Assert zsh binary exists
       ansible.builtin.assert:
         that: zsh_bin.stat.exists
-        fail_msg: "zsh binary not found at /usr/bin/zsh"
+        fail_msg: "~/.local/bin/zsh not found"
 
-    - name: Check nvim binary
+    - name: Stat ~/.config/zsh/.zshrc
       ansible.builtin.stat:
-        path: /usr/bin/nvim
+        path: ~/.config/zsh/.zshrc
+      register: zshrc_cfg
+
+    - name: Assert zshrc config exists
+      ansible.builtin.assert:
+        that: zshrc_cfg.stat.exists
+        fail_msg: "~/.config/zsh/.zshrc not found"
+
+    - name: Stat ~/.local/bin/nvim
+      ansible.builtin.stat:
+        path: ~/.local/bin/nvim
       register: nvim_bin
 
-    - name: Assert nvim is installed
+    - name: Assert nvim binary exists
       ansible.builtin.assert:
         that: nvim_bin.stat.exists
-        fail_msg: "nvim binary not found at /usr/bin/nvim"
+        fail_msg: "~/.local/bin/nvim not found"
+
+    - name: Stat ~/.config/nvim/init.lua
+      ansible.builtin.stat:
+        path: ~/.config/nvim/init.lua
+      register: init_lua
+
+    - name: Assert nvim config exists
+      ansible.builtin.assert:
+        that: init_lua.stat.exists
+        fail_msg: "~/.config/nvim/init.lua not found"
