@@ -1,1 +1,3 @@
+*.swp
+secrets/
 .ansible/

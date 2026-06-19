@@ -1,0 +1,4 @@
+---
+install: true
+editor: nvim
+lang: en_US.UTF-8
