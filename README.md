@@ -26,20 +26,9 @@ Run directly on a Steam Deck in desktop mode (SteamOS). No sudo required — eve
 
 ## Role Variables
 
-    install: true         # Set to false to uninstall
-
-    # Default editor / terminal
-    editor: nvim
-    terminal: alacritty
-
-    # ZSH
-    theme: robbyrussell
+    install: true    # Set to false to uninstall
+    editor: nvim     # Sets $EDITOR in zsh config
     lang: en_US.UTF-8
-    path:
-      - ~/.local/bin
-    plugins:
-      - git
-      - sudo
 
 ## Dependencies
 

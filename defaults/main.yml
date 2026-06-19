@@ -1,15 +1,4 @@
 ---
 install: true
-
-# Default editor / terminal
 editor: nvim
-terminal: alacritty
-
-# ZSH
-theme: robbyrussell
 lang: en_US.UTF-8
-path:
-  - ~/.local/bin
-plugins:
-  - git
-  - sudo

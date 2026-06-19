@@ -22,12 +22,8 @@ Each role detects `/etc/steamos-release` and installs to `~/.local` instead of u
 | Variable | Default | Description |
 |---|---|---|
 | `install` | `true` | Set to `false` to uninstall |
-| `editor` | `nvim` | Default `$EDITOR` |
-| `terminal` | `alacritty` | Default terminal emulator |
-| `theme` | `robbyrussell` | Oh My Zsh theme |
-| `lang` | `en_US.UTF-8` | Locale / `$LANG` |
-| `path` | `[~/.local/bin]` | Extra entries added to `$PATH` |
-| `plugins` | `[git, sudo]` | Oh My Zsh plugins |
+| `editor` | `nvim` | Default `$EDITOR` (written to zsh export config) |
+| `lang` | `en_US.UTF-8` | Locale / `$LANG` (written to zsh export config) |
 
 ## Commands
 
