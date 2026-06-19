@@ -76,9 +76,9 @@ SteamOS's rootfs is read-only, so install Ansible into a user venv:
     source ~/.venv/ansible/bin/activate
     pip install ansible
 
-Add the venv to your path (or activate it each session):
+Activate it each session before running the playbook:
 
-    echo 'source ~/.venv/ansible/bin/activate' >> ~/.bashrc
+    source ~/.venv/ansible/bin/activate
 
 ### Clone and Run
 

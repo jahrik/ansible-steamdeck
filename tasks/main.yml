@@ -3,7 +3,7 @@
   ansible.builtin.include_role:
     name: jahrik.alacritty
 
-- name: Install and configure zsh and set as default user shell
+- name: Install and configure zsh
   ansible.builtin.include_role:
     name: jahrik.zsh
 
