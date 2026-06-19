@@ -18,8 +18,10 @@ galaxy_info:
     - alacritty
     - zsh
     - nvim
+    - nerd_fonts
 
 dependencies:
+  - role: jahrik.nerd_fonts
   - role: jahrik.alacritty
   - role: jahrik.zsh
   - role: jahrik.nvim
