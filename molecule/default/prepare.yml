@@ -19,6 +19,12 @@
         state: present
         update_cache: true
 
+    - name: Remove /etc/arch-release to allow SteamOS detection
+      become: true
+      ansible.builtin.file:
+        path: /etc/arch-release
+        state: absent
+
     - name: Simulate SteamOS /etc/os-release
       become: true
       ansible.builtin.copy:
