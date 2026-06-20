@@ -4,15 +4,14 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: arch
+  - name: steamdeck
     image: jahrik/docker-archlinux-ansible
     pre_build_image: true
     pull: true
+    privileged: true
+    security_opts:
+      - seccomp=unconfined
 provisioner:
   name: ansible
-  inventory:
-    host_vars:
-      arch:
-        ansible_user: ansible
 verifier:
   name: ansible

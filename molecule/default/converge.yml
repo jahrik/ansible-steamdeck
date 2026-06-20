@@ -1,5 +1,7 @@
 ---
 - name: Converge
   hosts: all
-  roles:
-    - role: jahrik.steamdeck
+  tasks:
+    - name: Include jahrik.steamdeck
+      ansible.builtin.include_role:
+        name: jahrik.steamdeck
