@@ -2,3 +2,8 @@
 install: true
 editor: nvim
 lang: en_US.UTF-8
+konsole_profile_name: Default
+konsole_shell: "{{ ansible_user_dir }}/.local/bin/zsh"
+konsole_font: DejaVu Sans Mono
+konsole_font_size: 12
+konsole_history_size: 10000

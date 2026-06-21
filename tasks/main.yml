@@ -10,3 +10,6 @@
 - name: Install nvim, lazy, lsp, and plugins
   ansible.builtin.include_role:
     name: jahrik.nvim
+
+- name: Configure Konsole
+  ansible.builtin.include_tasks: konsole.yml

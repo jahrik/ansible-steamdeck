@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+
+[Appearance]
+ColorScheme=Breeze
+Font={{ konsole_font }},{{ konsole_font_size }},-1,5,50,0,0,0,0,0
+
+[General]
+Command={{ konsole_shell }}
+Name={{ konsole_profile_name }}
+Parent=FALLBACK/
+SemanticHints=1
+SemanticUpDown=1
+
+[Scrolling]
+HistorySize={{ konsole_history_size }}
+ScrollBarPosition=2
