@@ -41,9 +41,23 @@ Run directly on a Steam Deck in desktop mode (SteamOS). No sudo required — eve
 
 ## Example Playbook
 
-    - hosts: localhost
-      roles:
-         - { role: jahrik.steamdeck, install: true }
+```yaml
+---
+- hosts: localhost
+  roles:
+    - role: jahrik.steamdeck
+```
+
+To uninstall:
+
+```yaml
+---
+- hosts: localhost
+  vars:
+    install: false
+  roles:
+    - role: jahrik.steamdeck
+```
 
 ## License
 

@@ -50,5 +50,11 @@ molecule test -s localhost
 
 ## Molecule Scenarios
 
-- `default` — Docker, Arch Linux (`jahrik/docker-archlinux-ansible`)
+- `default` — Docker, Arch Linux (`jahrik/docker-archlinux-ansible`) with SteamOS simulated
 - `localhost` — applies the role to the current machine via `ansible_connection: local`
+
+## CI
+
+- **Lint**: yamllint + ansible-lint
+- **Molecule**: Arch Linux Docker container (SteamOS scenario)
+- **Release**: publishes to Ansible Galaxy on merge to `main`
