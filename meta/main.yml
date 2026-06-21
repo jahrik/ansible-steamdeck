@@ -18,7 +18,7 @@ galaxy_info:
     - alacritty
     - zsh
     - nvim
-    - nerd_fonts
+    - nerdfonts
 
 dependencies:
   - role: jahrik.nerd_fonts
