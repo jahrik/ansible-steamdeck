@@ -26,9 +26,26 @@ Run directly on a Steam Deck in desktop mode (SteamOS). No sudo required — eve
 
 ## Role Variables
 
-    install: true    # Set to false to uninstall
-    editor: nvim     # Sets $EDITOR in zsh config
-    lang: en_US.UTF-8
+| Variable | Default | Description |
+|---|---|---|
+| `install` | `true` | Set to `false` to uninstall |
+| `editor` | `nvim` | Sets `$EDITOR` in zsh config |
+| `lang` | `en_US.UTF-8` | Sets `$LANG` in zsh config |
+| `konsole_profile_name` | `Default` | Profile filename (without `.profile`) |
+| `konsole_shell` | `~/.local/bin/zsh` | Shell launched by Konsole |
+| `konsole_color_scheme` | `Catppuccin Mocha` | Color scheme name (downloaded from catppuccin/konsole) |
+| `konsole_font` | `DejaVu Sans Mono` | Font family |
+| `konsole_font_size` | `18` | Font size in points |
+| `konsole_line_spacing` | `0` | Extra pixels between lines |
+| `konsole_terminal_margin` | `1` | Border padding in pixels |
+| `konsole_cursor_shape` | `0` | 0=block, 1=I-beam, 2=underline |
+| `konsole_blinking_cursor` | `false` | Enable cursor blinking |
+| `konsole_history_mode` | `2` | 1=fixed size, 2=unlimited |
+| `konsole_history_size` | `0` | Scrollback lines (unused when mode=2) |
+| `konsole_scroll_bar_position` | `2` | 0=left, 1=right, 2=hidden |
+| `konsole_highlight_scrolled_lines` | `true` | Highlight newly scrolled lines |
+| `konsole_auto_copy_selected_text` | `false` | Auto-copy selection to clipboard |
+| `konsole_underline_links` | `true` | Underline URLs on hover |
 
 ## Dependencies
 

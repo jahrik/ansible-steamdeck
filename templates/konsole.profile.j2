@@ -1,8 +1,13 @@
 # {{ ansible_managed }}
 
 [Appearance]
-ColorScheme=Breeze
+ColorScheme={{ konsole_color_scheme }}
 Font={{ konsole_font }},{{ konsole_font_size }},-1,5,50,0,0,0,0,0
+LineSpacing={{ konsole_line_spacing }}
+
+[Cursor Options]
+BlinkingCursorEnabled={{ konsole_blinking_cursor | string | lower }}
+CursorShape={{ konsole_cursor_shape }}
 
 [General]
 Command={{ konsole_shell }}
@@ -10,7 +15,14 @@ Name={{ konsole_profile_name }}
 Parent=FALLBACK/
 SemanticHints=1
 SemanticUpDown=1
+TerminalMargin={{ konsole_terminal_margin }}
+
+[Interaction Options]
+AutoCopySelectedText={{ konsole_auto_copy_selected_text | string | lower }}
+UnderlineLinksEnabled={{ konsole_underline_links | string | lower }}
 
 [Scrolling]
+HighlightScrolledLines={{ konsole_highlight_scrolled_lines | string | lower }}
+HistoryMode={{ konsole_history_mode }}
 HistorySize={{ konsole_history_size }}
-ScrollBarPosition=2
+ScrollBarPosition={{ konsole_scroll_bar_position }}

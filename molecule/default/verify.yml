@@ -72,3 +72,35 @@
       ansible.builtin.assert:
         that: init_lua.stat.exists
         fail_msg: "~/.config/nvim/init.lua not found"
+
+    - name: Stat ~/.local/share/konsole/Default.profile
+      ansible.builtin.stat:
+        path: ~/.local/share/konsole/Default.profile
+      register: konsole_profile_stat
+
+    - name: Assert Konsole profile exists
+      ansible.builtin.assert:
+        that: konsole_profile_stat.stat.exists
+        fail_msg: "~/.local/share/konsole/Default.profile not found"
+
+    - name: Stat ~/.local/share/konsole/catppuccin-mocha.colorscheme
+      ansible.builtin.stat:
+        path: ~/.local/share/konsole/catppuccin-mocha.colorscheme
+      register: catppuccin_colorscheme_stat
+
+    - name: Assert Catppuccin Mocha color scheme was downloaded
+      ansible.builtin.assert:
+        that: catppuccin_colorscheme_stat.stat.exists
+        fail_msg: "~/.local/share/konsole/catppuccin-mocha.colorscheme not found"
+
+    - name: Check Konsole profile sets zsh as shell
+      ansible.builtin.command: grep -q "Command=.*zsh" ~/.local/share/konsole/Default.profile
+      changed_when: false
+
+    - name: Check Konsole profile uses Catppuccin Mocha color scheme
+      ansible.builtin.command: grep -q "ColorScheme=Catppuccin Mocha" ~/.local/share/konsole/Default.profile
+      changed_when: false
+
+    - name: Check konsolerc sets default profile
+      ansible.builtin.command: grep -q "DefaultProfile.*Default.profile" ~/.config/konsolerc
+      changed_when: false

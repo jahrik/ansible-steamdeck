@@ -15,7 +15,7 @@ Top-level meta role that configures a Steam Deck by composing sub-roles from Ans
 | `jahrik.zsh` | Shell + Oh My Zsh + Powerlevel10k |
 | `jahrik.nvim` | Neovim + Lazy + LSP |
 
-Each role detects `/etc/steamos-release` and installs to `~/.local` instead of using `pacman`, so the playbook needs no `become`/sudo.
+Each role detects `ansible_distribution_release == 'holo'` (from `VERSION_CODENAME` in `/etc/os-release`) and installs to `~/.local` instead of using `pacman`, so the playbook needs no `become`/sudo. Do not use `ansible_distribution == 'SteamOS'` — on the real Deck, Ansible reads `/etc/arch-release` first and always reports `Archlinux` for that fact.
 
 ## Key Variables (`defaults/main.yml`)
 
@@ -24,6 +24,21 @@ Each role detects `/etc/steamos-release` and installs to `~/.local` instead of u
 | `install` | `true` | Set to `false` to uninstall |
 | `editor` | `nvim` | Default `$EDITOR` (written to zsh export config) |
 | `lang` | `en_US.UTF-8` | Locale / `$LANG` (written to zsh export config) |
+| `konsole_profile_name` | `Default` | Konsole profile filename (without `.profile`) |
+| `konsole_shell` | `~/.local/bin/zsh` | Shell command set in the Konsole profile |
+| `konsole_color_scheme` | `Catppuccin Mocha` | Color scheme name — `catppuccin-mocha.colorscheme` is downloaded from catppuccin/konsole |
+| `konsole_font` | `DejaVu Sans Mono` | Font family |
+| `konsole_font_size` | `18` | Font size in points |
+| `konsole_line_spacing` | `0` | Extra pixels between lines (`[Appearance]`) |
+| `konsole_terminal_margin` | `1` | Padding in pixels between border and content |
+| `konsole_cursor_shape` | `0` | Cursor shape: 0=block, 1=I-beam, 2=underline |
+| `konsole_blinking_cursor` | `false` | Enable cursor blinking |
+| `konsole_history_mode` | `2` | Scrollback mode: 1=fixed size, 2=unlimited |
+| `konsole_history_size` | `0` | Scrollback line count (unused when `history_mode=2`) |
+| `konsole_scroll_bar_position` | `2` | Scrollbar: 0=left, 1=right, 2=hidden |
+| `konsole_highlight_scrolled_lines` | `true` | Briefly highlight lines scrolled into view |
+| `konsole_auto_copy_selected_text` | `false` | Copy selection to clipboard automatically (X11 style) |
+| `konsole_underline_links` | `true` | Underline URLs on hover |
 
 ## Commands
 
