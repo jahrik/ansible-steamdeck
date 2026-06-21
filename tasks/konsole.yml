@@ -1,0 +1,20 @@
+---
+- name: Ensure ~/.local/share/konsole exists
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.local/share/konsole"
+    state: directory
+    mode: '0755'
+
+- name: Deploy Konsole profile
+  ansible.builtin.template:
+    src: konsole.profile.j2
+    dest: "{{ ansible_user_dir }}/.local/share/konsole/{{ konsole_profile_name }}.profile"
+    mode: '0644'
+
+- name: Set default Konsole profile
+  community.general.ini_file:
+    path: "{{ ansible_user_dir }}/.config/konsolerc"
+    section: Desktop Entry
+    option: DefaultProfile
+    value: "{{ konsole_profile_name }}.profile"
+    mode: '0644'
