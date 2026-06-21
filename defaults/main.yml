@@ -2,8 +2,19 @@
 install: true
 editor: nvim
 lang: en_US.UTF-8
+
 konsole_profile_name: Default
 konsole_shell: "{{ ansible_user_dir }}/.local/bin/zsh"
+konsole_color_scheme: Catppuccin Mocha
 konsole_font: DejaVu Sans Mono
-konsole_font_size: 12
-konsole_history_size: 10000
+konsole_font_size: 18
+konsole_line_spacing: 0
+konsole_terminal_margin: 1
+konsole_cursor_shape: 0
+konsole_blinking_cursor: false
+konsole_history_mode: 2
+konsole_history_size: 0
+konsole_scroll_bar_position: 2
+konsole_highlight_scrolled_lines: true
+konsole_auto_copy_selected_text: false
+konsole_underline_links: true

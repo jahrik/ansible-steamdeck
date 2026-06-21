@@ -1,2 +1,6 @@
 ---
-# handlers file for steamdeck
+- name: Rebuild KDE system configuration cache
+  ansible.builtin.command: kbuildsycoca6 --noincremental
+  changed_when: false
+  failed_when: false
+  when: ansible_distribution_release == 'holo'
