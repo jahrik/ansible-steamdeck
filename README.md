@@ -3,7 +3,7 @@
 [![CICD](https://github.com/jahrik/ansible-steamdeck/actions/workflows/cicd.yml/badge.svg)](https://github.com/jahrik/ansible-steamdeck/actions/workflows/cicd.yml)
 [![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-jahrik.steamdeck-blue?logo=ansible)](https://galaxy.ansible.com/ui/standalone/roles/jahrik/steamdeck/)
 
-Configures a Steam Deck with [nerd_fonts](https://github.com/jahrik/ansible-nerd-fonts), [alacritty](https://github.com/jahrik/ansible-alacritty), [zsh](https://github.com/jahrik/ansible-zsh), and [nvim](https://github.com/jahrik/ansible-nvim). Each role detects SteamOS and works within its read-only rootfs: fonts go to `~/.local/share/fonts`, binaries to `~/.local/bin`, configs to `~/.config`. No `pacman`, no sudo.
+Configures a Steam Deck developer environment: [nerd_fonts](https://github.com/jahrik/ansible-nerd-fonts), [alacritty](https://github.com/jahrik/ansible-alacritty), [zsh](https://github.com/jahrik/ansible-zsh), [nvim](https://github.com/jahrik/ansible-nvim), Konsole, fzf, uv, Go, and a Podman+dind Docker testing stack. Each role detects SteamOS and works within its read-only rootfs: fonts go to `~/.local/share/fonts`, binaries to `~/.local/bin`, configs to `~/.config`. No `pacman`, no sudo.
 
 <!-- vim-markdown-toc GFM -->
 
@@ -46,6 +46,11 @@ Run directly on a Steam Deck in desktop mode (SteamOS). No sudo required — eve
 | `konsole_highlight_scrolled_lines` | `true` | Highlight newly scrolled lines |
 | `konsole_auto_copy_selected_text` | `false` | Auto-copy selection to clipboard |
 | `konsole_underline_links` | `true` | Underline URLs on hover |
+| `go_version` | `1.26.4` | Go toolchain version to install |
+| `docker_cli_version` | `29.5.3` | docker-cli static binary version |
+| `dind_image` | `docker:dind` | Docker-in-Podman container image |
+| `dind_name` | `dind` | Podman container name for the dind instance |
+| `dind_host` | `tcp://127.0.0.1:2375` | Docker host URL used by dswarm/docker-cli |
 
 ## Dependencies
 

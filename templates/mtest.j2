@@ -1,0 +1,17 @@
+#!/bin/bash
+# {{ ansible_managed }}
+# Run molecule tests using Podman as the Docker backend.
+# Usage: mtest [molecule args]   e.g.  mtest test  |  mtest converge  |  mtest destroy
+ROLE_NAME=$(basename "$PWD")
+ROLE_CACHE="$HOME/.ansible/roles"
+
+# Clear stale cached role dirs so molecule re-creates the symlink to the local role
+if [[ -e "$ROLE_CACHE/$ROLE_NAME" && ! -L "$ROLE_CACHE/$ROLE_NAME" ]]; then
+  echo "Clearing stale role cache: $ROLE_CACHE/$ROLE_NAME"
+  rm -rf "$ROLE_CACHE/$ROLE_NAME"
+fi
+
+exec env \
+  DOCKER_HOST=unix:///run/user/{{ ansible_user_uid }}/podman/podman.sock \
+  PATH="$HOME/.local/bin:$HOME/.venv/ansible/bin:$PATH" \
+  molecule "${@:-test}"

@@ -3,6 +3,14 @@ install: true
 editor: nvim
 lang: en_US.UTF-8
 
+go_version: "1.26.4"
+
+# Docker/dind
+docker_cli_version: "29.5.3"
+dind_image: docker:dind
+dind_name: dind
+dind_host: tcp://127.0.0.1:2375
+
 konsole_profile_name: Default
 konsole_shell: "{{ ansible_user_dir }}/.local/bin/zsh"
 konsole_color_scheme: Catppuccin Mocha

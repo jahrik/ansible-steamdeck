@@ -59,3 +59,85 @@
     - name: Check konsolerc sets default profile
       ansible.builtin.command: grep -q "DefaultProfile.*Default.profile" "{{ ansible_user_dir }}/.config/konsolerc"
       changed_when: false
+
+    - name: Check uv binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/bin/uv"
+      register: uv_bin
+
+    - name: Assert uv is installed
+      ansible.builtin.assert:
+        that: uv_bin.stat.exists
+
+    - name: Check uvx binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/bin/uvx"
+      register: uvx_bin
+
+    - name: Assert uvx is installed
+      ansible.builtin.assert:
+        that: uvx_bin.stat.exists
+
+    - name: Check go binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/go/bin/go"
+      register: go_bin
+
+    - name: Assert go is installed
+      ansible.builtin.assert:
+        that: go_bin.stat.exists
+
+    - name: Check Go PATH in zsh local config
+      ansible.builtin.command: grep -q "go/bin" "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+      changed_when: false
+
+    - name: Check fzf binary exists
+      ansible.builtin.command: which fzf
+      register: fzf_bin
+      changed_when: false
+
+    - name: Assert fzf is installed
+      ansible.builtin.assert:
+        that: fzf_bin.rc == 0
+
+    - name: Check fzf shell integration in local.zsh
+      ansible.builtin.command: grep -q "fzf --zsh" "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+      changed_when: false
+
+    - name: Check dswarm wrapper exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/bin/dswarm"
+      register: dswarm_bin
+
+    - name: Assert dswarm is installed
+      ansible.builtin.assert:
+        that: dswarm_bin.stat.exists
+
+    - name: Check docker-cli binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/bin/docker-cli"
+      register: docker_cli_bin
+
+    - name: Assert docker-cli is installed
+      ansible.builtin.assert:
+        that: docker_cli_bin.stat.exists
+
+    - name: Check dind container is running
+      ansible.builtin.command: podman ps --filter name=dind --filter status=running --quiet
+      register: dind_running
+      changed_when: false
+
+    - name: Assert dind container is running
+      ansible.builtin.assert:
+        that: dind_running.stdout != ''
+        fail_msg: "dind container is not running"
+
+    - name: Check Docker Swarm is initialized
+      ansible.builtin.command: "{{ ansible_user_dir }}/.local/bin/docker-cli --host {{ dind_host }} info --format '{{ '{{' }}.Swarm.LocalNodeState{{ '}}' }}'"
+      register: swarm_state
+      changed_when: false
+
+    - name: Assert Docker Swarm is initialized
+      ansible.builtin.assert:
+        that: swarm_state.stdout == 'active'
+        fail_msg: "Docker Swarm is not initialized (state: {{ swarm_state.stdout }})"

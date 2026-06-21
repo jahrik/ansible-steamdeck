@@ -4,7 +4,15 @@ This file provides guidance to AI coding agents when working with code in this r
 
 ## Role Overview
 
-Top-level meta role that configures a Steam Deck by composing sub-roles from Ansible Galaxy. Unlike `ansible-arch-workstation`, it deliberately excludes X11 window-manager roles (i3-gaps, polybar, urxvt, conky) and `yay`, since SteamOS runs KDE/gamescope and has a read-only rootfs that blocks AUR builds.
+Top-level meta role that builds a full developer environment on a Steam Deck by composing sub-roles and managing tools directly. Unlike `ansible-arch-workstation`, it excludes X11 window-manager roles (i3-gaps, polybar, urxvt, conky) and `yay`, since SteamOS runs KDE/gamescope and has a read-only rootfs that blocks AUR builds.
+
+### What this role manages
+
+| Task file | What it does |
+|---|---|
+| `tasks/konsole.yml` | Konsole profile + Catppuccin Mocha color scheme + default profile setting |
+| `tasks/tools.yml` | fzf CLI, uv + uvx, Go toolchain — downloaded as static binaries to `~/.local/bin` |
+| `tasks/docker.yml` | Podman socket, docker-cli static binary, dind container, Docker Swarm init, dswarm/mtest/docker shims |
 
 ## Composed Roles (`requirements.yml`)
 
@@ -39,6 +47,25 @@ Each role detects `ansible_distribution_release == 'holo'` (from `VERSION_CODENA
 | `konsole_highlight_scrolled_lines` | `true` | Briefly highlight lines scrolled into view |
 | `konsole_auto_copy_selected_text` | `false` | Copy selection to clipboard automatically (X11 style) |
 | `konsole_underline_links` | `true` | Underline URLs on hover |
+| `go_version` | `1.26.4` | Go toolchain version (tarball from dl.google.com) |
+| `docker_cli_version` | `29.5.3` | docker-cli static binary version |
+| `dind_image` | `docker:dind` | Docker-in-Podman image |
+| `dind_name` | `dind` | Podman container name |
+| `dind_host` | `tcp://127.0.0.1:2375` | Docker host used by dswarm and docker-cli checks |
+
+## Docker/dind Design Notes
+
+Docker tasks are gated on **both** `ansible_distribution_release == 'holo'` and `/run/user/<uid>` existing (proves a real systemd user session). This prevents the tasks from running in Docker containers used by the `default` molecule scenario.
+
+The dind setup runs `docker:dind` under Podman with `--privileged --network=host`. No `--security-opt seccomp=unconfined`. `files/daemon.json` sets `"iptables": false` and `"bridge": "none"` to avoid NAT chain and bridge-network failures inside the Podman container.
+
+Shims deployed to `~/.local/bin/`:
+
+| Shim | Purpose |
+|---|---|
+| `docker` | Passes all args to `podman` |
+| `dswarm` | Runs static `docker-cli` against the dind swarm (`DOCKER_HOST=tcp://127.0.0.1:2375`) |
+| `mtest` | Runs `molecule` with Podman socket and venv PATH; clears stale role cache automatically |
 
 ## Commands
 
