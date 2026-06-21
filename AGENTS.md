@@ -37,6 +37,10 @@ ansible-playbook playbook.yml -i inventory.ini
 # Uninstall
 ansible-playbook playbook.yml -i inventory.ini -e install=false
 
+# Install test dependencies and activate venv
+uv sync
+source .venv/bin/activate
+
 # Lint
 yamllint .
 ansible-lint
