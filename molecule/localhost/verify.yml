@@ -29,3 +29,20 @@
     - name: Assert nvim is installed
       ansible.builtin.assert:
         that: nvim_bin.rc == 0
+
+    - name: Check Konsole profile exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/share/konsole/Default.profile"
+      register: konsole_profile
+
+    - name: Assert Konsole profile exists
+      ansible.builtin.assert:
+        that: konsole_profile.stat.exists
+
+    - name: Check Konsole profile sets zsh as shell
+      ansible.builtin.command: grep -q "Command=.*zsh" "{{ ansible_user_dir }}/.local/share/konsole/Default.profile"
+      changed_when: false
+
+    - name: Check konsolerc sets default profile
+      ansible.builtin.command: grep -q "DefaultProfile=Default.profile" "{{ ansible_user_dir }}/.config/konsolerc"
+      changed_when: false
