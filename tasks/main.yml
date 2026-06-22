@@ -19,3 +19,6 @@
 
 - name: Setup Docker/dind
   ansible.builtin.include_tasks: docker.yml
+
+- name: Configure KDE Plasma
+  ansible.builtin.include_tasks: kde.yml

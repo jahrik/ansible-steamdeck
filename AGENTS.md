@@ -11,8 +11,11 @@ Top-level meta role that builds a full developer environment on a Steam Deck by 
 | Task file | What it does |
 |---|---|
 | `tasks/konsole.yml` | Konsole profile + Catppuccin Mocha color scheme + default profile setting |
-| `tasks/tools.yml` | fzf CLI, uv + uvx, Go toolchain — downloaded as static binaries to `~/.local/bin` |
+| `tasks/tools.yml` | Static-binary CLI tools to `~/.local/bin` (fzf, ripgrep, bat, eza, delta, zoxide, lazygit, fd, gh, direnv, tealdeer/`tldr`, yq, uv+uvx, Go) + tmux config + Catppuccin Mocha theming for bat/delta/fzf/lazygit/btop |
 | `tasks/docker.yml` | Podman socket, docker-cli static binary, dind container, Docker Swarm init, dswarm/mtest/docker shims |
+| `tasks/kde.yml` | KDE Plasma: Catppuccin Mocha color scheme, wallpaper, bottom panel, 24h clock, aurorae window decoration, cursor, Papirus-Dark icons + Mocha folders |
+
+Most tools fetch their latest release via the GitHub API (`uri` → `tag_name`); `go_version`, `papirus_version`, and the catppuccin `*_version` vars are pinned in `defaults/main.yml`. Each install task has a matching uninstall task gated on `not install`.
 
 ## Composed Roles (`requirements.yml`)
 
@@ -52,6 +55,23 @@ Each role detects `ansible_distribution_release == 'holo'` (from `VERSION_CODENA
 | `dind_image` | `docker:dind` | Docker-in-Podman image |
 | `dind_name` | `dind` | Podman container name |
 | `dind_host` | `tcp://127.0.0.1:2375` | Docker host used by dswarm and docker-cli checks |
+| `catppuccin_kde_version` | `v0.2.7` | catppuccin/kde release (color schemes + aurorae) |
+| `catppuccin_kde_color_scheme` | `CatppuccinMochaMauve` | Active KDE color scheme |
+| `catppuccin_accent` | `mauve` | Accent reused for lazygit theme + cursor |
+| `catppuccin_wallpaper_url` | dark-forest jpg | Wallpaper download URL |
+| `catppuccin_aurorae_theme` | `CatppuccinMocha-Modern` | Aurorae window decoration |
+| `catppuccin_cursors_version` | `v2.0.0` | catppuccin/cursors release |
+| `papirus_version` | `20250501` | Papirus icon theme release tag |
+
+## KDE Theming Design Notes
+
+`tasks/kde.yml` gates its whole block on `kde_tooling.rc == 0` (a `which plasma-apply-colorscheme` check), so KDE tasks skip cleanly in the Docker `default` scenario where the binaries are absent. KDE verify assertions live only in `molecule/localhost/verify.yml`.
+
+**Global Plasma style / look-and-feel is intentionally NOT applied** — catppuccin/kde ships no official Plasma desktop theme, and applying a global look-and-feel would override the color scheme, panel position, and wallpaper this role sets. The color scheme + window decoration + cursor + Papirus icons give a cohesive Catppuccin look without that risk.
+
+The **Restart plasmashell** handler uses `systemctl --user restart plasma-plasmashell.service` — NOT `plasmashell --replace`. On Plasma 6 Wayland, plasmashell is a supervised systemd user service; a detached `--replace` gets reaped when the ansible run exits, crashing the live desktop.
+
+Icons: Papirus-Dark is installed to `~/.local/share/icons` (no official Catppuccin icon set exists), then `papirus-folders -C cat-mocha-<accent> --theme Papirus-Dark` colorizes folders using SVGs overlaid from `catppuccin/papirus-folders`.
 
 ## Docker/dind Design Notes
 

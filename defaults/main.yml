@@ -5,6 +5,15 @@ lang: en_US.UTF-8
 
 go_version: "1.26.4"
 
+# KDE Plasma
+catppuccin_kde_version: "v0.2.7"
+catppuccin_kde_color_scheme: CatppuccinMochaMauve
+catppuccin_accent: mauve
+catppuccin_wallpaper_url: "https://raw.githubusercontent.com/orangci/walls-catppuccin-mocha/master/dark-forest.jpg"
+catppuccin_aurorae_theme: CatppuccinMocha-Modern
+catppuccin_cursors_version: v2.0.0
+papirus_version: "20250501"
+
 # Docker/dind
 docker_cli_version: "29.5.3"
 dind_image: docker:dind
