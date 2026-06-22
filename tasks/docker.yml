@@ -49,6 +49,7 @@
             dest: /tmp
             include:
               - docker/docker
+            remote_src: true
 
         - name: Install docker-cli
           ansible.builtin.copy:

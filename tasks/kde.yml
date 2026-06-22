@@ -200,6 +200,12 @@
       notify: Reconfigure KWin
 
     # --- Cursor theme ---
+    - name: Ensure ~/.local/share/icons exists
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/share/icons"
+        state: directory
+        mode: '0755'
+
     - name: Download Catppuccin cursor theme
       ansible.builtin.unarchive:
         src: "https://github.com/catppuccin/cursors/releases/download/{{ catppuccin_cursors_version }}/catppuccin-mocha-{{ catppuccin_accent }}-cursors.zip"

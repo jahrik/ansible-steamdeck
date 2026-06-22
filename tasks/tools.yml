@@ -304,11 +304,17 @@
         state: absent
         scope: global
 
+    # Remove only our specific include, not any other include.path the user set.
+    # git_config state=absent would drop every include.path entry, so use --unset
+    # with the value matching our file.
     - name: Remove Catppuccin delta include
-      community.general.git_config:
-        name: include.path
-        state: absent
-        scope: global
+      ansible.builtin.command:
+        cmd: >
+          git config --global --unset include.path
+          {{ (ansible_user_dir ~ '/.config/delta/catppuccin.gitconfig') | regex_escape }}
+      register: delta_include_unset
+      changed_when: delta_include_unset.rc == 0
+      failed_when: delta_include_unset.rc not in [0, 5]  # noqa: command-instead-of-module
 
     - name: Remove delta config directory
       ansible.builtin.file:
