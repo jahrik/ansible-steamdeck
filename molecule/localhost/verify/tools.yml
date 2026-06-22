@@ -1,22 +1,43 @@
 ---
-- name: Check rg binary exists
-  ansible.builtin.command: which rg
-  changed_when: false
+- name: Check tool binaries exist
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.local/bin/{{ item }}"
+  register: tool_bins
+  loop:
+    - rg
+    - bat
+    - eza
+    - delta
+    - zoxide
+    - lazygit
+    - yq
+    - fzf
+    - fd
+    - gh
+    - direnv
+    - tldr
+    - uv
+    - uvx
 
-- name: Check bat binary exists
-  ansible.builtin.command: which bat
-  changed_when: false
+- name: Assert tool binaries are installed
+  ansible.builtin.assert:
+    that: item.stat.exists
+    fail_msg: "Missing binary: {{ item.item }}"
+  loop: "{{ tool_bins.results }}"
+  loop_control:
+    label: "{{ item.item }}"
 
-- name: Check eza binary exists
-  ansible.builtin.command: which eza
-  changed_when: false
+- name: Check go binary exists
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.local/go/bin/go"
+  register: go_bin
+
+- name: Assert go is installed
+  ansible.builtin.assert:
+    that: go_bin.stat.exists
 
 - name: Check eza aliases in zsh
   ansible.builtin.command: grep -q "alias ls='eza'" "{{ ansible_user_dir }}/.config/zsh/local.zsh"
-  changed_when: false
-
-- name: Check delta binary exists
-  ansible.builtin.command: which delta
   changed_when: false
 
 - name: Check delta is set as git pager
@@ -29,20 +50,8 @@
   ansible.builtin.assert:
     that: git_pager.config_value == 'delta'
 
-- name: Check zoxide binary exists
-  ansible.builtin.command: which zoxide
-  changed_when: false
-
 - name: Check zoxide shell integration in zsh
   ansible.builtin.command: grep -q "zoxide init zsh" "{{ ansible_user_dir }}/.config/zsh/local.zsh"
-  changed_when: false
-
-- name: Check lazygit binary exists
-  ansible.builtin.command: which lazygit
-  changed_when: false
-
-- name: Check yq binary exists
-  ansible.builtin.command: which yq
   changed_when: false
 
 - name: Check tmux config exists
@@ -54,69 +63,16 @@
   ansible.builtin.assert:
     that: tmux_conf.stat.exists
 
-- name: Check uv binary exists
-  ansible.builtin.stat:
-    path: "{{ ansible_user_dir }}/.local/bin/uv"
-  register: uv_bin
-
-- name: Assert uv is installed
-  ansible.builtin.assert:
-    that: uv_bin.stat.exists
-
-- name: Check uvx binary exists
-  ansible.builtin.stat:
-    path: "{{ ansible_user_dir }}/.local/bin/uvx"
-  register: uvx_bin
-
-- name: Assert uvx is installed
-  ansible.builtin.assert:
-    that: uvx_bin.stat.exists
-
-- name: Check go binary exists
-  ansible.builtin.stat:
-    path: "{{ ansible_user_dir }}/.local/go/bin/go"
-  register: go_bin
-
-- name: Assert go is installed
-  ansible.builtin.assert:
-    that: go_bin.stat.exists
-
 - name: Check Go PATH in zsh local config
   ansible.builtin.command: grep -q "go/bin" "{{ ansible_user_dir }}/.config/zsh/local.zsh"
   changed_when: false
-
-- name: Check fzf binary exists
-  ansible.builtin.command: which fzf
-  register: fzf_bin
-  changed_when: false
-
-- name: Assert fzf is installed
-  ansible.builtin.assert:
-    that: fzf_bin.rc == 0
 
 - name: Check fzf shell integration in local.zsh
   ansible.builtin.command: grep -q "fzf --zsh" "{{ ansible_user_dir }}/.config/zsh/local.zsh"
   changed_when: false
 
-
-- name: Check fd binary exists
-  ansible.builtin.command: which fd
-  changed_when: false
-
-- name: Check gh binary exists
-  ansible.builtin.command: which gh
-  changed_when: false
-
-- name: Check direnv binary exists
-  ansible.builtin.command: which direnv
-  changed_when: false
-
 - name: Check direnv shell integration in zsh
   ansible.builtin.command: grep -q "direnv hook zsh" "{{ ansible_user_dir }}/.config/zsh/local.zsh"
-  changed_when: false
-
-- name: Check tldr binary exists
-  ansible.builtin.command: which tldr
   changed_when: false
 
 - name: Check bat config sets Catppuccin theme

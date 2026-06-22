@@ -7,19 +7,20 @@
         path: "{{ ansible_user_dir }}/.local/bin/delta"
       register: delta_bin
 
-    - name: Get latest delta release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/dandavison/delta/releases/latest
-        return_content: true
-      register: delta_release
+    - name: Download delta archive
+      ansible.builtin.get_url:
+        url: "https://github.com/dandavison/delta/releases/download/{{ delta_version }}/delta-{{ delta_version }}-x86_64-unknown-linux-musl.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/delta-{{ delta_version }}.tar.gz"
+        checksum: "{{ delta_checksum }}"
+        mode: '0644'
       when: not delta_bin.stat.exists
 
-    - name: Download and extract delta binary
+    - name: Extract delta binary
       ansible.builtin.unarchive:
-        src: "https://github.com/dandavison/delta/releases/download/{{ delta_release.json.tag_name }}/delta-{{ delta_release.json.tag_name }}-x86_64-unknown-linux-musl.tar.gz"
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/delta-{{ delta_version }}.tar.gz"
         dest: "{{ ansible_user_dir }}/.local/bin"
         include:
-          - "delta-{{ delta_release.json.tag_name }}-x86_64-unknown-linux-musl/delta"
+          - "delta-{{ delta_version }}-x86_64-unknown-linux-musl/delta"
         extra_opts:
           - --strip-components=1
         mode: '0755'
@@ -106,16 +107,17 @@
         path: "{{ ansible_user_dir }}/.local/bin/lazygit"
       register: lazygit_bin
 
-    - name: Get latest lazygit release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
-        return_content: true
-      register: lazygit_release
+    - name: Download lazygit archive
+      ansible.builtin.get_url:
+        url: "https://github.com/jesseduffield/lazygit/releases/download/v{{ lazygit_version }}/lazygit_{{ lazygit_version }}_Linux_x86_64.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/lazygit-{{ lazygit_version }}.tar.gz"
+        checksum: "{{ lazygit_checksum }}"
+        mode: '0644'
       when: not lazygit_bin.stat.exists
 
-    - name: Download and extract lazygit binary
+    - name: Extract lazygit binary
       ansible.builtin.unarchive:
-        src: "https://github.com/jesseduffield/lazygit/releases/download/{{ lazygit_release.json.tag_name }}/lazygit_{{ lazygit_release.json.tag_name | regex_replace('^v', '') }}_Linux_x86_64.tar.gz"
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/lazygit-{{ lazygit_version }}.tar.gz"
         dest: "{{ ansible_user_dir }}/.local/bin"
         include:
           - lazygit
@@ -156,19 +158,20 @@
         path: "{{ ansible_user_dir }}/.local/bin/gh"
       register: gh_bin
 
-    - name: Get latest gh release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/cli/cli/releases/latest
-        return_content: true
-      register: gh_release
+    - name: Download gh archive
+      ansible.builtin.get_url:
+        url: "https://github.com/cli/cli/releases/download/v{{ gh_version }}/gh_{{ gh_version }}_linux_amd64.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/gh-{{ gh_version }}.tar.gz"
+        checksum: "{{ gh_checksum }}"
+        mode: '0644'
       when: not gh_bin.stat.exists
 
-    - name: Download and extract gh binary
+    - name: Extract gh binary
       ansible.builtin.unarchive:
-        src: "https://github.com/cli/cli/releases/download/{{ gh_release.json.tag_name }}/gh_{{ gh_release.json.tag_name | regex_replace('^v', '') }}_linux_amd64.tar.gz"
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/gh-{{ gh_version }}.tar.gz"
         dest: "{{ ansible_user_dir }}/.local/bin"
         include:
-          - "gh_{{ gh_release.json.tag_name | regex_replace('^v', '') }}_linux_amd64/bin/gh"
+          - "gh_{{ gh_version }}_linux_amd64/bin/gh"
         extra_opts:
           - --strip-components=2
         mode: '0755'

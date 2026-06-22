@@ -59,6 +59,8 @@ CLI tools installed to `~/.local/bin` (`jq`, `btop`, and `tmux` ship with SteamO
 
 `bat`, `delta`, `fzf`, `lazygit`, and `btop` are themed Catppuccin Mocha.
 
+Each tool is pinned to a specific version in [`defaults/main.yml`](defaults/main.yml) and its download is verified against a SHA256 checksum. To upgrade a tool, bump its `*_version` and `*_checksum` together (the checksum is `sha256sum` of the release asset).
+
 ## Role Variables
 
 The handiest knobs are below. See [`defaults/main.yml`](defaults/main.yml) for the complete list — including the full set of `konsole_*` appearance options (line spacing, cursor shape, scrollbar, etc.) and the `catppuccin_*`/`papirus_*` version pins.

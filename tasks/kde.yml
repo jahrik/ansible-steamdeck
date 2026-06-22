@@ -208,8 +208,43 @@
       notify: Rebuild KDE system configuration cache
 
 - name: Remove KDE Plasma customizations
-  when: not (install | default(true) | bool)
+  when:
+    - not (install | default(true) | bool)
+    - kde_tooling.rc == 0
   block:
+    - name: Reset color scheme to Breeze Dark
+      ansible.builtin.command:
+        cmd: plasma-apply-colorscheme BreezeDark
+      changed_when: true
+      failed_when: false
+
+    - name: Reset cursor theme to Breeze
+      ansible.builtin.command:
+        cmd: plasma-apply-cursortheme breeze_cursors
+      changed_when: true
+      failed_when: false
+
+    - name: Reset icon theme to breeze-dark
+      ansible.builtin.command:
+        cmd: >
+          kwriteconfig6
+          --file {{ ansible_user_dir }}/.config/kdeglobals
+          --group Icons --key Theme breeze-dark
+      changed_when: true
+      notify: Rebuild KDE system configuration cache
+
+    - name: Reset window decoration to Breeze
+      ansible.builtin.command:
+        cmd: >
+          kwriteconfig6
+          --file {{ ansible_user_dir }}/.config/kwinrc
+          --group org.kde.kdecoration2 --key {{ item.key }} {{ item.value }}
+      loop:
+        - { key: library, value: org.kde.breeze }
+        - { key: theme, value: Breeze }
+      changed_when: true
+      notify: Reconfigure KWin
+
     - name: Remove Catppuccin color scheme files
       ansible.builtin.file:
         path: "{{ ansible_user_dir }}/.local/share/color-schemes/{{ item }}.colors"

@@ -7,16 +7,17 @@
         path: "{{ ansible_user_dir }}/.local/bin/zoxide"
       register: zoxide_bin
 
-    - name: Get latest zoxide release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest
-        return_content: true
-      register: zoxide_release
+    - name: Download zoxide archive
+      ansible.builtin.get_url:
+        url: "https://github.com/ajeetdsouza/zoxide/releases/download/v{{ zoxide_version }}/zoxide-{{ zoxide_version }}-x86_64-unknown-linux-musl.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/zoxide-{{ zoxide_version }}.tar.gz"
+        checksum: "{{ zoxide_checksum }}"
+        mode: '0644'
       when: not zoxide_bin.stat.exists
 
-    - name: Download and extract zoxide binary
+    - name: Extract zoxide binary
       ansible.builtin.unarchive:
-        src: "https://github.com/ajeetdsouza/zoxide/releases/download/{{ zoxide_release.json.tag_name }}/zoxide-{{ zoxide_release.json.tag_name | regex_replace('^v', '') }}-x86_64-unknown-linux-musl.tar.gz"
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/zoxide-{{ zoxide_version }}.tar.gz"
         dest: "{{ ansible_user_dir }}/.local/bin"
         include:
           - zoxide
@@ -53,17 +54,11 @@
         path: "{{ ansible_user_dir }}/.local/bin/direnv"
       register: direnv_bin
 
-    - name: Get latest direnv release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/direnv/direnv/releases/latest
-        return_content: true
-      register: direnv_release
-      when: not direnv_bin.stat.exists
-
     - name: Download direnv binary
       ansible.builtin.get_url:
-        url: "https://github.com/direnv/direnv/releases/download/{{ direnv_release.json.tag_name }}/direnv.linux-amd64"
+        url: "https://github.com/direnv/direnv/releases/download/v{{ direnv_version }}/direnv.linux-amd64"
         dest: "{{ ansible_user_dir }}/.local/bin/direnv"
+        checksum: "{{ direnv_checksum }}"
         mode: '0755'
       when: not direnv_bin.stat.exists
 
@@ -96,17 +91,11 @@
         path: "{{ ansible_user_dir }}/.local/bin/tldr"
       register: tldr_bin
 
-    - name: Get latest tealdeer release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/dbrgn/tealdeer/releases/latest
-        return_content: true
-      register: tealdeer_release
-      when: not tldr_bin.stat.exists
-
     - name: Download tldr binary
       ansible.builtin.get_url:
-        url: "https://github.com/dbrgn/tealdeer/releases/download/{{ tealdeer_release.json.tag_name }}/tealdeer-linux-x86_64-musl"
+        url: "https://github.com/dbrgn/tealdeer/releases/download/v{{ tealdeer_version }}/tealdeer-linux-x86_64-musl"
         dest: "{{ ansible_user_dir }}/.local/bin/tldr"
+        checksum: "{{ tealdeer_checksum }}"
         mode: '0755'
       when: not tldr_bin.stat.exists
 
@@ -126,17 +115,11 @@
         path: "{{ ansible_user_dir }}/.local/bin/yq"
       register: yq_bin
 
-    - name: Get latest yq release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/mikefarah/yq/releases/latest
-        return_content: true
-      register: yq_release
-      when: not yq_bin.stat.exists
-
     - name: Download yq binary
       ansible.builtin.get_url:
-        url: "https://github.com/mikefarah/yq/releases/download/{{ yq_release.json.tag_name }}/yq_linux_amd64"
+        url: "https://github.com/mikefarah/yq/releases/download/v{{ yq_version }}/yq_linux_amd64"
         dest: "{{ ansible_user_dir }}/.local/bin/yq"
+        checksum: "{{ yq_checksum }}"
         mode: '0755'
       when: not yq_bin.stat.exists
 

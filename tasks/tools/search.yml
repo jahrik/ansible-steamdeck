@@ -7,21 +7,17 @@
         path: "{{ ansible_user_dir }}/.local/bin/fzf"
       register: fzf_bin
 
-    - name: Get latest fzf release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/junegunn/fzf/releases/latest
-        return_content: true
-      register: fzf_release
+    - name: Download fzf archive
+      ansible.builtin.get_url:
+        url: "https://github.com/junegunn/fzf/releases/download/v{{ fzf_version }}/fzf-{{ fzf_version }}-linux_amd64.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/fzf-{{ fzf_version }}.tar.gz"
+        checksum: "{{ fzf_checksum }}"
+        mode: '0644'
       when: not fzf_bin.stat.exists
 
-    - name: Set fzf version fact
-      ansible.builtin.set_fact:
-        fzf_version: "{{ fzf_release.json.tag_name | regex_replace('^v', '') }}"
-      when: not fzf_bin.stat.exists
-
-    - name: Download and extract fzf binary
+    - name: Extract fzf binary
       ansible.builtin.unarchive:
-        src: "https://github.com/junegunn/fzf/releases/download/v{{ fzf_version }}/fzf-{{ fzf_version }}-linux_amd64.tar.gz"
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/fzf-{{ fzf_version }}.tar.gz"
         dest: "{{ ansible_user_dir }}/.local/bin"
         include:
           - fzf
@@ -88,19 +84,20 @@
         path: "{{ ansible_user_dir }}/.local/bin/rg"
       register: rg_bin
 
-    - name: Get latest ripgrep release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/BurntSushi/ripgrep/releases/latest
-        return_content: true
-      register: rg_release
+    - name: Download ripgrep archive
+      ansible.builtin.get_url:
+        url: "https://github.com/BurntSushi/ripgrep/releases/download/{{ ripgrep_version }}/ripgrep-{{ ripgrep_version }}-x86_64-unknown-linux-musl.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/ripgrep-{{ ripgrep_version }}.tar.gz"
+        checksum: "{{ ripgrep_checksum }}"
+        mode: '0644'
       when: not rg_bin.stat.exists
 
-    - name: Download and extract rg binary
+    - name: Extract rg binary
       ansible.builtin.unarchive:
-        src: "https://github.com/BurntSushi/ripgrep/releases/download/{{ rg_release.json.tag_name }}/ripgrep-{{ rg_release.json.tag_name }}-x86_64-unknown-linux-musl.tar.gz"
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/ripgrep-{{ ripgrep_version }}.tar.gz"
         dest: "{{ ansible_user_dir }}/.local/bin"
         include:
-          - "ripgrep-{{ rg_release.json.tag_name }}-x86_64-unknown-linux-musl/rg"
+          - "ripgrep-{{ ripgrep_version }}-x86_64-unknown-linux-musl/rg"
         extra_opts:
           - --strip-components=1
         mode: '0755'
@@ -123,19 +120,20 @@
         path: "{{ ansible_user_dir }}/.local/bin/fd"
       register: fd_bin
 
-    - name: Get latest fd release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/sharkdp/fd/releases/latest
-        return_content: true
-      register: fd_release
+    - name: Download fd archive
+      ansible.builtin.get_url:
+        url: "https://github.com/sharkdp/fd/releases/download/v{{ fd_version }}/fd-v{{ fd_version }}-x86_64-unknown-linux-musl.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/fd-{{ fd_version }}.tar.gz"
+        checksum: "{{ fd_checksum }}"
+        mode: '0644'
       when: not fd_bin.stat.exists
 
-    - name: Download and extract fd binary
+    - name: Extract fd binary
       ansible.builtin.unarchive:
-        src: "https://github.com/sharkdp/fd/releases/download/{{ fd_release.json.tag_name }}/fd-{{ fd_release.json.tag_name }}-x86_64-unknown-linux-musl.tar.gz"
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/fd-{{ fd_version }}.tar.gz"
         dest: "{{ ansible_user_dir }}/.local/bin"
         include:
-          - "fd-{{ fd_release.json.tag_name }}-x86_64-unknown-linux-musl/fd"
+          - "fd-v{{ fd_version }}-x86_64-unknown-linux-musl/fd"
         extra_opts:
           - --strip-components=1
         mode: '0755'
@@ -158,19 +156,20 @@
         path: "{{ ansible_user_dir }}/.local/bin/bat"
       register: bat_bin
 
-    - name: Get latest bat release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/sharkdp/bat/releases/latest
-        return_content: true
-      register: bat_release
+    - name: Download bat archive
+      ansible.builtin.get_url:
+        url: "https://github.com/sharkdp/bat/releases/download/v{{ bat_version }}/bat-v{{ bat_version }}-x86_64-unknown-linux-musl.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/bat-{{ bat_version }}.tar.gz"
+        checksum: "{{ bat_checksum }}"
+        mode: '0644'
       when: not bat_bin.stat.exists
 
-    - name: Download and extract bat binary
+    - name: Extract bat binary
       ansible.builtin.unarchive:
-        src: "https://github.com/sharkdp/bat/releases/download/{{ bat_release.json.tag_name }}/bat-{{ bat_release.json.tag_name }}-x86_64-unknown-linux-musl.tar.gz"
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/bat-{{ bat_version }}.tar.gz"
         dest: "{{ ansible_user_dir }}/.local/bin"
         include:
-          - "bat-{{ bat_release.json.tag_name }}-x86_64-unknown-linux-musl/bat"
+          - "bat-v{{ bat_version }}-x86_64-unknown-linux-musl/bat"
         extra_opts:
           - --strip-components=1
         mode: '0755'
@@ -218,16 +217,17 @@
         path: "{{ ansible_user_dir }}/.local/bin/eza"
       register: eza_bin
 
-    - name: Get latest eza release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/eza-community/eza/releases/latest
-        return_content: true
-      register: eza_release
+    - name: Download eza archive
+      ansible.builtin.get_url:
+        url: "https://github.com/eza-community/eza/releases/download/v{{ eza_version }}/eza_x86_64-unknown-linux-musl.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/eza-{{ eza_version }}.tar.gz"
+        checksum: "{{ eza_checksum }}"
+        mode: '0644'
       when: not eza_bin.stat.exists
 
-    - name: Download and extract eza binary
+    - name: Extract eza binary
       ansible.builtin.unarchive:
-        src: "https://github.com/eza-community/eza/releases/download/{{ eza_release.json.tag_name }}/eza_x86_64-unknown-linux-musl.tar.gz"
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/eza-{{ eza_version }}.tar.gz"
         dest: "{{ ansible_user_dir }}/.local/bin"
         mode: '0755'
         remote_src: true

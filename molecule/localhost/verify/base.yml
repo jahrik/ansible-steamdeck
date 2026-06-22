@@ -1,30 +1,20 @@
 ---
-- name: Check alacritty binary exists
-  ansible.builtin.command: which alacritty
-  register: alacritty_bin
-  changed_when: false
+- name: Check base role binaries exist
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.local/bin/{{ item }}"
+  register: base_bins
+  loop:
+    - alacritty
+    - zsh
+    - nvim
 
-- name: Assert alacritty is installed
+- name: Assert base role binaries are installed
   ansible.builtin.assert:
-    that: alacritty_bin.rc == 0
-
-- name: Check zsh binary exists
-  ansible.builtin.command: which zsh
-  register: zsh_bin
-  changed_when: false
-
-- name: Assert zsh is installed
-  ansible.builtin.assert:
-    that: zsh_bin.rc == 0
-
-- name: Check nvim binary exists
-  ansible.builtin.command: which nvim
-  register: nvim_bin
-  changed_when: false
-
-- name: Assert nvim is installed
-  ansible.builtin.assert:
-    that: nvim_bin.rc == 0
+    that: item.stat.exists
+    fail_msg: "Missing binary: {{ item.item }}"
+  loop: "{{ base_bins.results }}"
+  loop_control:
+    label: "{{ item.item }}"
 
 - name: Check Konsole profile exists
   ansible.builtin.stat:

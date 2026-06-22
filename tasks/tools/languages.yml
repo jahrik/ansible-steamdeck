@@ -7,21 +7,17 @@
         path: "{{ ansible_user_dir }}/.local/bin/uv"
       register: uv_bin
 
-    - name: Get latest uv release
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/astral-sh/uv/releases/latest
-        return_content: true
-      register: uv_release
+    - name: Download uv archive
+      ansible.builtin.get_url:
+        url: "https://github.com/astral-sh/uv/releases/download/{{ uv_version }}/uv-x86_64-unknown-linux-gnu.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/uv-{{ uv_version }}.tar.gz"
+        checksum: "{{ uv_checksum }}"
+        mode: '0644'
       when: not uv_bin.stat.exists
 
-    - name: Set uv version fact
-      ansible.builtin.set_fact:
-        uv_version: "{{ uv_release.json.tag_name | regex_replace('^v', '') }}"
-      when: not uv_bin.stat.exists
-
-    - name: Download and extract uv binaries
+    - name: Extract uv binaries
       ansible.builtin.unarchive:
-        src: "https://github.com/astral-sh/uv/releases/download/{{ uv_release.json.tag_name }}/uv-x86_64-unknown-linux-gnu.tar.gz"
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/uv-{{ uv_version }}.tar.gz"
         dest: "{{ ansible_user_dir }}/.local/bin"
         include:
           - uv-x86_64-unknown-linux-gnu/uv
@@ -51,9 +47,17 @@
         path: "{{ ansible_user_dir }}/.local/go/bin/go"
       register: go_bin
 
-    - name: Download and extract Go toolchain
+    - name: Download Go archive
+      ansible.builtin.get_url:
+        url: "https://dl.google.com/go/go{{ go_version }}.linux-amd64.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/go-{{ go_version }}.tar.gz"
+        checksum: "{{ go_checksum }}"
+        mode: '0644'
+      when: not go_bin.stat.exists
+
+    - name: Extract Go toolchain
       ansible.builtin.unarchive:
-        src: "https://dl.google.com/go/go{{ go_version }}.linux-amd64.tar.gz"
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/go-{{ go_version }}.tar.gz"
         dest: "{{ ansible_user_dir }}/.local"
         remote_src: true
       when: not go_bin.stat.exists

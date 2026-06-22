@@ -15,7 +15,7 @@ Top-level meta role that builds a full developer environment on a Steam Deck by 
 | `tasks/docker.yml` | Podman socket, docker-cli static binary, dind container, Docker Swarm init, dswarm/mtest/docker shims |
 | `tasks/kde.yml` | KDE Plasma: Catppuccin Mocha color scheme, wallpaper, bottom panel, aurorae window decoration, cursor, Papirus-Dark icons |
 
-Most tools fetch their latest release via the GitHub API (`uri` → `tag_name`); `go_version`, `papirus_version`, and the catppuccin `*_version` vars are pinned in `defaults/main.yml`. Each install task has a matching uninstall task gated on `not install`.
+Every downloaded tool is pinned to a `<tool>_version` in `defaults/main.yml` and verified against a `<tool>_checksum` (`sha256:...`). Tarball tools `get_url` the archive (with `checksum:`) into `~/.cache/ansible-steamdeck/` then `unarchive` it with `remote_src: true` — `unarchive` itself has no `checksum:` option, so the verification happens on the `get_url` step. Single-binary tools (direnv, tealdeer, yq) `get_url` straight to `~/.local/bin` with `checksum:`. To bump a tool, change its `*_version` and `*_checksum` together (`sha256sum` of the release asset). Each install task has a matching uninstall task gated on `not install`.
 
 ## Composed Roles (`requirements.yml`)
 

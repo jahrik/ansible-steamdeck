@@ -3,7 +3,50 @@ install: true
 editor: nvim
 lang: en_US.UTF-8
 
+# CLI tools — pinned versions + SHA256 of the downloaded asset.
+# To bump: change the version, download the new asset, and update the checksum
+# (sha256sum on the release tarball/binary).
 go_version: "1.26.4"
+go_checksum: sha256:1153d3d50e0ac764b447adfe05c2bcf08e889d42a02e0fe0259bd47f6733ad7f
+
+fzf_version: "0.73.1"
+fzf_checksum: sha256:f3252c2c366bc1700d3c85781ec8c9695998927ac127870eb049ceea2d540f8a
+
+ripgrep_version: "15.1.0"
+ripgrep_checksum: sha256:1c9297be4a084eea7ecaedf93eb03d058d6faae29bbc57ecdaf5063921491599
+
+fd_version: "10.4.2"
+fd_checksum: sha256:e3257d48e29a6be965187dbd24ce9af564e0fe67b3e73c9bdcd180f4ec11bdde
+
+bat_version: "0.26.1"
+bat_checksum: sha256:0dcd8ac79732c0d5b136f11f4ee00e581440e16a44eab5b3105b611bbf2cf191
+
+eza_version: "0.23.4"
+eza_checksum: sha256:d231bb3ee33b08c76279b5888845dceb7034d055c42bb9be46dbe0dae39394df
+
+zoxide_version: "0.9.9"
+zoxide_checksum: sha256:4ff057d3c4d957946937274c2b8be7af2a9bbae7f90a1b5e9baaa7cb65a20caa
+
+direnv_version: "2.37.1"
+direnv_checksum: sha256:1f1b93dd6f38523fde26dfac96151ef9d31a374e3005cd3345fb93555ae0c9b5
+
+tealdeer_version: "1.8.1"
+tealdeer_checksum: sha256:6f2fad4435e0110484d3f25cdc4bf20129dae03238f32d06ebdd00bdc50ae2ed
+
+yq_version: "4.53.3"
+yq_checksum: sha256:fa52a4e758c63d38299163fbdd1edfb4c4963247918bf9c1c5d31d84789eded4
+
+delta_version: "0.19.2"
+delta_checksum: sha256:f1ea01ca7728ce3462debc359f39dfc7cbbc1a63224b71fefabf92042864aa1b
+
+lazygit_version: "0.62.2"
+lazygit_checksum: sha256:8b9a4c2d0969cbea92b45c956dd2a44e1ba76900c9df49f1c60984045ce77984
+
+gh_version: "2.95.0"
+gh_checksum: sha256:25d1e4729e8808c9ed3d613e96ebd3f3e44446f2d368c89d878a71a36ddb3d8c
+
+uv_version: "0.11.23"
+uv_checksum: sha256:e12c4cda2fe8c305510a78380a88f2c32a27e90cdcd123cefd2873388f0ebb5f
 
 # KDE Plasma
 catppuccin_kde_version: "v0.2.7"

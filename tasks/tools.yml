@@ -1,4 +1,11 @@
 ---
+- name: Ensure tool download cache directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.cache/ansible-steamdeck"
+    state: directory
+    mode: '0755'
+  when: install | default(true) | bool
+
 - name: Install search and file tools
   ansible.builtin.include_tasks: tools/search.yml
 
