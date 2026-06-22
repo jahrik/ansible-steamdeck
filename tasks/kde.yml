@@ -78,89 +78,36 @@
       changed_when: true
 
     # --- Panel: move to bottom ---
-    - name: Find plasma panel containment ID
-      ansible.builtin.shell:
-        cmd: |
-          python3 -c "
-          import re
-          with open('{{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc') as f:
-              content = f.read()
-          m = re.search(r'\[Containments\]\[(\d+)\][^\[]*?plugin=org\.kde\.panel', content, re.DOTALL)
-          print(m.group(1) if m else '')
-          "
-      register: panel_id
-      changed_when: false
+    - name: Read Plasma applets config
+      ansible.builtin.slurp:
+        src: "{{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc"
+      register: plasma_appletsrc
+
+    - name: Find Plasma panel containment ID
+      ansible.builtin.set_fact:
+        panel_id: "{{ (plasma_appletsrc.content | b64decode | regex_search('\\[Containments\\]\\[(\\d+)\\][^\\[]*?plugin=org\\.kde\\.panel', '\\1') or ['']) | first }}"
 
     - name: Check panel location
       ansible.builtin.command:
         cmd: >
           kreadconfig6
           --file {{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc
-          --group Containments --group {{ panel_id.stdout }}
+          --group Containments --group {{ panel_id }}
           --key location
       register: panel_location
       changed_when: false
-      when: panel_id.stdout != ''
+      when: panel_id != ''
 
     - name: Move panel to bottom
       ansible.builtin.command:
         cmd: >
           kwriteconfig6
           --file {{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc
-          --group Containments --group {{ panel_id.stdout }}
+          --group Containments --group {{ panel_id }}
           --key location --type int 4
       when:
-        - panel_id.stdout != ''
+        - panel_id != ''
         - (panel_location.stdout | default('') | int) != 4
-      changed_when: true
-      notify: Restart plasmashell
-
-    # --- Clock: 24h format ---
-    - name: Find digital clock applet ID
-      ansible.builtin.shell:
-        cmd: |
-          python3 -c "
-          import re
-          with open('{{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc') as f:
-              content = f.read()
-          m = re.search(
-              r'\[Containments\]\[{{ panel_id.stdout }}\]\[Applets\]\[(\d+)\][^\[]*?plugin=org\.kde\.plasma\.digitalclock',
-              content, re.DOTALL
-          )
-          print(m.group(1) if m else '')
-          "
-      register: clock_id
-      changed_when: false
-      when: panel_id.stdout != ''
-
-    - name: Check clock format
-      ansible.builtin.command:
-        cmd: >
-          kreadconfig6
-          --file {{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc
-          --group Containments --group {{ panel_id.stdout }}
-          --group Applets --group {{ clock_id.stdout }}
-          --group Configuration --group Appearance
-          --key use24hFormat
-      register: clock_format
-      changed_when: false
-      when:
-        - panel_id.stdout | default('') != ''
-        - clock_id.stdout | default('') != ''
-
-    - name: Set clock to 24h format
-      ansible.builtin.command:
-        cmd: >
-          kwriteconfig6
-          --file {{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc
-          --group Containments --group {{ panel_id.stdout }}
-          --group Applets --group {{ clock_id.stdout }}
-          --group Configuration --group Appearance
-          --key use24hFormat --type int 2
-      when:
-        - panel_id.stdout | default('') != ''
-        - clock_id.stdout | default('') != ''
-        - (clock_format.stdout | default('') | int) != 2
       changed_when: true
       notify: Restart plasmashell
 
@@ -226,7 +173,7 @@
       when: cursor_theme.stdout != 'catppuccin-mocha-' + catppuccin_accent + '-cursors'
       changed_when: true
 
-    # --- Icons (Papirus-Dark + Catppuccin Mocha folders) ---
+    # --- Icons (Papirus-Dark) ---
     - name: Check if Papirus icons are installed
       ansible.builtin.stat:
         path: "{{ ansible_user_dir }}/.local/share/icons/Papirus-Dark"
@@ -243,34 +190,12 @@
         remote_src: true
       when: not papirus_dir.stat.exists
 
-    - name: Overlay Catppuccin Mocha folder icons into Papirus
-      ansible.builtin.unarchive:
-        src: "https://github.com/catppuccin/papirus-folders/archive/refs/heads/main.tar.gz"
-        dest: "{{ ansible_user_dir }}/.local/share/icons/Papirus"
-        extra_opts:
-          - --strip-components=2
-          - papirus-folders-main/src
-        remote_src: true
-        creates: "{{ ansible_user_dir }}/.local/share/icons/Papirus/22x22/places/folder-cat-mocha-{{ catppuccin_accent }}.svg"
-
-    - name: Install papirus-folders script
-      ansible.builtin.get_url:
-        url: "https://github.com/PapirusDevelopmentTeam/papirus-folders/raw/master/papirus-folders"
-        dest: "{{ ansible_user_dir }}/.local/bin/papirus-folders"
-        mode: '0755'
-
     - name: Check current icon theme
       ansible.builtin.command:
         cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kdeglobals --group Icons --key Theme
       register: icon_theme
       changed_when: false
       failed_when: false
-
-    - name: Colorize Papirus folders with Catppuccin Mocha
-      ansible.builtin.command:
-        cmd: "{{ ansible_user_dir }}/.local/bin/papirus-folders -C cat-mocha-{{ catppuccin_accent }} --theme Papirus-Dark"
-      when: icon_theme.stdout != 'Papirus-Dark'
-      changed_when: true
 
     - name: Set Papirus-Dark as icon theme
       ansible.builtin.command:
@@ -309,9 +234,4 @@
     - name: Remove Catppuccin cursor theme
       ansible.builtin.file:
         path: "{{ ansible_user_dir }}/.local/share/icons/catppuccin-mocha-{{ catppuccin_accent }}-cursors"
-        state: absent
-
-    - name: Remove papirus-folders script
-      ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/bin/papirus-folders"
         state: absent

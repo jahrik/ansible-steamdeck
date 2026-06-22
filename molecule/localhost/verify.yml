@@ -282,25 +282,21 @@
       ansible.builtin.assert:
         that: kde_wallpaper_file.stat.exists
 
+    - name: Read Plasma applets config
+      ansible.builtin.slurp:
+        src: "{{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc"
+      register: verify_appletsrc
+
     - name: Find plasma panel containment ID
-      ansible.builtin.shell:
-        cmd: |
-          python3 -c "
-          import re
-          with open('{{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc') as f:
-              content = f.read()
-          m = re.search(r'\[Containments\]\[(\d+)\][^\[]*?plugin=org\.kde\.panel', content, re.DOTALL)
-          print(m.group(1) if m else '')
-          "
-      register: verify_panel_id
-      changed_when: false
+      ansible.builtin.set_fact:
+        verify_panel_id: "{{ (verify_appletsrc.content | b64decode | regex_search('\\[Containments\\]\\[(\\d+)\\][^\\[]*?plugin=org\\.kde\\.panel', '\\1') or ['']) | first }}"
 
     - name: Check panel location
       ansible.builtin.command:
         cmd: >
           kreadconfig6
           --file {{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc
-          --group Containments --group {{ verify_panel_id.stdout }} --key location
+          --group Containments --group {{ verify_panel_id }} --key location
       register: kde_panel_location
       changed_when: false
 

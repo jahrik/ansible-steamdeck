@@ -13,7 +13,7 @@ Top-level meta role that builds a full developer environment on a Steam Deck by 
 | `tasks/konsole.yml` | Konsole profile + Catppuccin Mocha color scheme + default profile setting |
 | `tasks/tools.yml` | Static-binary CLI tools to `~/.local/bin` (fzf, ripgrep, bat, eza, delta, zoxide, lazygit, fd, gh, direnv, tealdeer/`tldr`, yq, uv+uvx, Go) + tmux config + Catppuccin Mocha theming for bat/delta/fzf/lazygit/btop |
 | `tasks/docker.yml` | Podman socket, docker-cli static binary, dind container, Docker Swarm init, dswarm/mtest/docker shims |
-| `tasks/kde.yml` | KDE Plasma: Catppuccin Mocha color scheme, wallpaper, bottom panel, 24h clock, aurorae window decoration, cursor, Papirus-Dark icons + Mocha folders |
+| `tasks/kde.yml` | KDE Plasma: Catppuccin Mocha color scheme, wallpaper, bottom panel, aurorae window decoration, cursor, Papirus-Dark icons |
 
 Most tools fetch their latest release via the GitHub API (`uri` → `tag_name`); `go_version`, `papirus_version`, and the catppuccin `*_version` vars are pinned in `defaults/main.yml`. Each install task has a matching uninstall task gated on `not install`.
 
@@ -71,7 +71,7 @@ Each role detects `ansible_distribution_release == 'holo'` (from `VERSION_CODENA
 
 The **Restart plasmashell** handler uses `systemctl --user restart plasma-plasmashell.service` — NOT `plasmashell --replace`. On Plasma 6 Wayland, plasmashell is a supervised systemd user service; a detached `--replace` gets reaped when the ansible run exits, crashing the live desktop.
 
-Icons: Papirus-Dark is installed to `~/.local/share/icons` (no official Catppuccin icon set exists), then `papirus-folders -C cat-mocha-<accent> --theme Papirus-Dark` colorizes folders using SVGs overlaid from `catppuccin/papirus-folders`.
+Icons: Papirus-Dark is installed to `~/.local/share/icons` (no official Catppuccin icon set exists) and set as the icon theme.
 
 ## Docker/dind Design Notes
 

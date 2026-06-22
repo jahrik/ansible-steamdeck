@@ -8,7 +8,7 @@ Configures a Steam Deck developer environment with a consistent Catppuccin Mocha
 - **Terminal & Konsole** — Catppuccin Mocha Konsole profile, font size 18, unlimited scrollback.
 - **CLI tools** — fzf, ripgrep, bat, eza, delta, zoxide, lazygit, fd, gh, direnv, tealdeer (`tldr`), yq (jq/btop/tmux come from SteamOS). Catppuccin Mocha theming for bat, delta, fzf, lazygit, and btop.
 - **Languages & containers** — uv, Go, and a Podman + dind Docker/Swarm testing stack (`dswarm`/`mtest`/`docker` shims).
-- **KDE Plasma** — Catppuccin Mocha (Mauve) color scheme, dark wallpaper, bottom panel, 24h clock, Catppuccin window decorations + cursor, and Papirus-Dark icons with Mocha folders. (KDE tasks run only on real hardware.)
+- **KDE Plasma** — Catppuccin Mocha (Mauve) color scheme, dark wallpaper, bottom panel, Catppuccin window decorations + cursor, and Papirus-Dark icons. (KDE tasks run only on real hardware.)
 
 Everything works within SteamOS's read-only rootfs: binaries to `~/.local/bin`, configs to `~/.config`, themes to `~/.local/share`. No `pacman`, no sudo.
 

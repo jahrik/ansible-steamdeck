@@ -306,12 +306,17 @@
 
     # Remove only our specific include, not any other include.path the user set.
     # git_config state=absent would drop every include.path entry, so use --unset
-    # with the value matching our file.
+    # with an anchored regex matching exactly our file. argv avoids shell parsing,
+    # which would otherwise strip the regex_escape backslashes.
     - name: Remove Catppuccin delta include
       ansible.builtin.command:
-        cmd: >
-          git config --global --unset include.path
-          {{ (ansible_user_dir ~ '/.config/delta/catppuccin.gitconfig') | regex_escape }}
+        argv:
+          - git
+          - config
+          - --global
+          - --unset
+          - include.path
+          - "^{{ (ansible_user_dir ~ '/.config/delta/catppuccin.gitconfig') | regex_escape }}$"
       register: delta_include_unset
       changed_when: delta_include_unset.rc == 0
       failed_when: delta_include_unset.rc not in [0, 5]  # noqa: command-instead-of-module
