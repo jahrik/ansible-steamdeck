@@ -1,0 +1,57 @@
+---
+- name: Check alacritty binary exists
+  ansible.builtin.command: which alacritty
+  register: alacritty_bin
+  changed_when: false
+
+- name: Assert alacritty is installed
+  ansible.builtin.assert:
+    that: alacritty_bin.rc == 0
+
+- name: Check zsh binary exists
+  ansible.builtin.command: which zsh
+  register: zsh_bin
+  changed_when: false
+
+- name: Assert zsh is installed
+  ansible.builtin.assert:
+    that: zsh_bin.rc == 0
+
+- name: Check nvim binary exists
+  ansible.builtin.command: which nvim
+  register: nvim_bin
+  changed_when: false
+
+- name: Assert nvim is installed
+  ansible.builtin.assert:
+    that: nvim_bin.rc == 0
+
+- name: Check Konsole profile exists
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.local/share/konsole/Default.profile"
+  register: konsole_profile
+
+- name: Assert Konsole profile exists
+  ansible.builtin.assert:
+    that: konsole_profile.stat.exists
+
+- name: Check Catppuccin Mocha color scheme was downloaded
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.local/share/konsole/catppuccin-mocha.colorscheme"
+  register: catppuccin_colorscheme
+
+- name: Assert Catppuccin Mocha color scheme exists
+  ansible.builtin.assert:
+    that: catppuccin_colorscheme.stat.exists
+
+- name: Check Konsole profile sets zsh as shell
+  ansible.builtin.command: grep -q "Command=.*zsh" "{{ ansible_user_dir }}/.local/share/konsole/Default.profile"
+  changed_when: false
+
+- name: Check Konsole profile uses Catppuccin Mocha
+  ansible.builtin.command: grep -q "ColorScheme=Catppuccin Mocha" "{{ ansible_user_dir }}/.local/share/konsole/Default.profile"
+  changed_when: false
+
+- name: Check konsolerc sets default profile
+  ansible.builtin.command: grep -q "DefaultProfile.*Default.profile" "{{ ansible_user_dir }}/.config/konsolerc"
+  changed_when: false
