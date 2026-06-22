@@ -1,0 +1,62 @@
+---
+- name: Configure tmux
+  when: install | default(true) | bool
+  block:
+    - name: Ensure ~/.config/tmux directory exists
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.config/tmux"
+        state: directory
+        mode: '0755'
+
+    - name: Deploy tmux config
+      ansible.builtin.template:
+        src: tmux.conf.j2
+        dest: "{{ ansible_user_dir }}/.config/tmux/tmux.conf"
+        mode: '0644'
+
+- name: Unconfigure tmux
+  when: not (install | default(true) | bool)
+  block:
+    - name: Remove tmux config
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.config/tmux/tmux.conf"
+        state: absent
+
+- name: Theme btop
+  when: install | default(true) | bool
+  block:
+    - name: Ensure btop themes directory exists
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.config/btop/themes"
+        state: directory
+        mode: '0755'
+
+    - name: Download Catppuccin Mocha btop theme
+      ansible.builtin.get_url:
+        url: "https://github.com/catppuccin/btop/raw/main/themes/catppuccin_mocha.theme"
+        dest: "{{ ansible_user_dir }}/.config/btop/themes/catppuccin_mocha.theme"
+        mode: '0644'
+
+    - name: Set btop color theme
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_user_dir }}/.config/btop/btop.conf"
+        regexp: '^color_theme\s*='
+        line: 'color_theme = "catppuccin_mocha"'
+        create: true
+        mode: '0644'
+
+    - name: Disable btop theme background
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_user_dir }}/.config/btop/btop.conf"
+        regexp: '^theme_background\s*='
+        line: 'theme_background = False'
+        create: true
+        mode: '0644'
+
+- name: Untheme btop
+  when: not (install | default(true) | bool)
+  block:
+    - name: Remove btop Catppuccin theme
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.config/btop/themes/catppuccin_mocha.theme"
+        state: absent

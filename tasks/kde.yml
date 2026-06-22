@@ -1,0 +1,272 @@
+---
+- name: Check for KDE Plasma tooling
+  ansible.builtin.command:
+    cmd: which plasma-apply-colorscheme
+  register: kde_tooling
+  changed_when: false
+  failed_when: false
+
+- name: Configure KDE Plasma
+  when:
+    - install | default(true) | bool
+    - kde_tooling.rc == 0
+  block:
+    # --- Color scheme ---
+    - name: Ensure color-schemes directory exists
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/share/color-schemes"
+        state: directory
+        mode: '0755'
+
+    - name: Download Catppuccin Mocha color schemes
+      ansible.builtin.unarchive:
+        src: "https://github.com/catppuccin/kde/releases/download/{{ catppuccin_kde_version }}/Mocha-color-schemes.tar.gz"
+        dest: "{{ ansible_user_dir }}/.local/share/color-schemes"
+        extra_opts:
+          - --strip-components=1
+        remote_src: true
+        creates: "{{ ansible_user_dir }}/.local/share/color-schemes/{{ catppuccin_kde_color_scheme }}.colors"
+
+    - name: Check current KDE color scheme
+      ansible.builtin.command:
+        cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kdeglobals --group General --key ColorScheme
+      register: kde_color_scheme
+      changed_when: false
+
+    - name: Apply Catppuccin Mocha color scheme
+      ansible.builtin.command:
+        cmd: plasma-apply-colorscheme {{ catppuccin_kde_color_scheme }}
+      when: kde_color_scheme.stdout != catppuccin_kde_color_scheme
+      changed_when: true
+      notify: Restart plasmashell
+
+    # --- Wallpaper ---
+    - name: Ensure wallpapers directory exists
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/share/wallpapers"
+        state: directory
+        mode: '0755'
+
+    - name: Download Catppuccin wallpaper
+      ansible.builtin.get_url:
+        url: "{{ catppuccin_wallpaper_url }}"
+        dest: "{{ ansible_user_dir }}/.local/share/wallpapers/catppuccin-mocha.jpg"
+        mode: '0644'
+        force: true
+      register: wallpaper_download
+
+    - name: Check current wallpaper
+      ansible.builtin.command:
+        cmd: >
+          kreadconfig6
+          --file {{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc
+          --group Containments --group 1 --group Wallpaper
+          --group org.kde.image --group General
+          --key Image
+      register: current_wallpaper
+      changed_when: false
+      failed_when: false
+
+    - name: Apply wallpaper
+      ansible.builtin.command:
+        cmd: >
+          plasma-apply-wallpaperimage
+          {{ ansible_user_dir }}/.local/share/wallpapers/catppuccin-mocha.jpg
+      when: >
+        wallpaper_download.changed
+        or ansible_user_dir + '/.local/share/wallpapers/catppuccin-mocha.jpg' not in current_wallpaper.stdout
+      changed_when: true
+
+    # --- Panel: move to bottom ---
+    - name: Read Plasma applets config
+      ansible.builtin.slurp:
+        src: "{{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc"
+      register: plasma_appletsrc
+
+    - name: Find Plasma panel containment ID
+      ansible.builtin.set_fact:
+        panel_id: "{{ (plasma_appletsrc.content | b64decode | regex_search('\\[Containments\\]\\[(\\d+)\\][^\\[]*?plugin=org\\.kde\\.panel', '\\1') or ['']) | first }}"
+
+    - name: Check panel location
+      ansible.builtin.command:
+        cmd: >
+          kreadconfig6
+          --file {{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc
+          --group Containments --group {{ panel_id }}
+          --key location
+      register: panel_location
+      changed_when: false
+      when: panel_id != ''
+
+    - name: Move panel to bottom
+      ansible.builtin.command:
+        cmd: >
+          kwriteconfig6
+          --file {{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc
+          --group Containments --group {{ panel_id }}
+          --key location --type int 4
+      when:
+        - panel_id != ''
+        - (panel_location.stdout | default('') | int) != 4
+      changed_when: true
+      notify: Restart plasmashell
+
+    # --- Window decoration (Aurorae) ---
+    - name: Ensure aurorae themes directory exists
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/share/aurorae/themes"
+        state: directory
+        mode: '0755'
+
+    - name: Download Catppuccin aurorae window decorations
+      ansible.builtin.unarchive:
+        src: "https://github.com/catppuccin/kde/releases/download/{{ catppuccin_kde_version }}/Modern-Aurorae-Theme.tar.gz"
+        dest: "{{ ansible_user_dir }}/.local/share/aurorae/themes"
+        remote_src: true
+        creates: "{{ ansible_user_dir }}/.local/share/aurorae/themes/{{ catppuccin_aurorae_theme }}"
+
+    - name: Check current window decoration theme
+      ansible.builtin.command:
+        cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kwinrc --group org.kde.kdecoration2 --key theme
+      register: kwin_deco
+      changed_when: false
+      failed_when: false
+
+    - name: Set Catppuccin window decoration
+      ansible.builtin.command:
+        cmd: >
+          kwriteconfig6
+          --file {{ ansible_user_dir }}/.config/kwinrc
+          --group org.kde.kdecoration2
+          --key {{ item.key }} {{ item.value }}
+      loop:
+        - { key: library, value: org.kde.kwin.aurorae }
+        - { key: theme, value: "__aurorae__svg__{{ catppuccin_aurorae_theme }}" }
+      when: kwin_deco.stdout != '__aurorae__svg__' + catppuccin_aurorae_theme
+      changed_when: true
+      notify: Reconfigure KWin
+
+    # --- Cursor theme ---
+    - name: Ensure ~/.local/share/icons exists
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/share/icons"
+        state: directory
+        mode: '0755'
+
+    - name: Download Catppuccin cursor theme
+      ansible.builtin.unarchive:
+        src: "https://github.com/catppuccin/cursors/releases/download/{{ catppuccin_cursors_version }}/catppuccin-mocha-{{ catppuccin_accent }}-cursors.zip"
+        dest: "{{ ansible_user_dir }}/.local/share/icons"
+        remote_src: true
+        creates: "{{ ansible_user_dir }}/.local/share/icons/catppuccin-mocha-{{ catppuccin_accent }}-cursors"
+
+    - name: Check current cursor theme
+      ansible.builtin.command:
+        cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kcminputrc --group Mouse --key cursorTheme
+      register: cursor_theme
+      changed_when: false
+      failed_when: false
+
+    - name: Apply Catppuccin cursor theme
+      ansible.builtin.command:
+        cmd: plasma-apply-cursortheme catppuccin-mocha-{{ catppuccin_accent }}-cursors
+      when: cursor_theme.stdout != 'catppuccin-mocha-' + catppuccin_accent + '-cursors'
+      changed_when: true
+
+    # --- Icons (Papirus-Dark) ---
+    - name: Check if Papirus icons are installed
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/share/icons/Papirus-Dark"
+      register: papirus_dir
+
+    - name: Download and extract Papirus icon theme
+      ansible.builtin.unarchive:
+        src: "https://github.com/PapirusDevelopmentTeam/papirus-icon-theme/archive/refs/tags/{{ papirus_version }}.tar.gz"
+        dest: "{{ ansible_user_dir }}/.local/share/icons"
+        extra_opts:
+          - --strip-components=1
+          - "papirus-icon-theme-{{ papirus_version }}/Papirus"
+          - "papirus-icon-theme-{{ papirus_version }}/Papirus-Dark"
+        remote_src: true
+      when: not papirus_dir.stat.exists
+
+    - name: Check current icon theme
+      ansible.builtin.command:
+        cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kdeglobals --group Icons --key Theme
+      register: icon_theme
+      changed_when: false
+      failed_when: false
+
+    - name: Set Papirus-Dark as icon theme
+      ansible.builtin.command:
+        cmd: >
+          kwriteconfig6
+          --file {{ ansible_user_dir }}/.config/kdeglobals
+          --group Icons --key Theme Papirus-Dark
+      when: icon_theme.stdout != 'Papirus-Dark'
+      changed_when: true
+      notify: Rebuild KDE system configuration cache
+
+- name: Remove KDE Plasma customizations
+  when:
+    - not (install | default(true) | bool)
+    - kde_tooling.rc == 0
+  block:
+    - name: Reset color scheme to Breeze Dark
+      ansible.builtin.command:
+        cmd: plasma-apply-colorscheme BreezeDark
+      changed_when: true
+      failed_when: false
+
+    - name: Reset cursor theme to Breeze
+      ansible.builtin.command:
+        cmd: plasma-apply-cursortheme breeze_cursors
+      changed_when: true
+      failed_when: false
+
+    - name: Reset icon theme to breeze-dark
+      ansible.builtin.command:
+        cmd: >
+          kwriteconfig6
+          --file {{ ansible_user_dir }}/.config/kdeglobals
+          --group Icons --key Theme breeze-dark
+      changed_when: true
+      notify: Rebuild KDE system configuration cache
+
+    - name: Reset window decoration to Breeze
+      ansible.builtin.command:
+        cmd: >
+          kwriteconfig6
+          --file {{ ansible_user_dir }}/.config/kwinrc
+          --group org.kde.kdecoration2 --key {{ item.key }} {{ item.value }}
+      loop:
+        - { key: library, value: org.kde.breeze }
+        - { key: theme, value: Breeze }
+      changed_when: true
+      notify: Reconfigure KWin
+
+    - name: Remove Catppuccin color scheme files
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/share/color-schemes/{{ item }}.colors"
+        state: absent
+      loop:
+        - CatppuccinMochaMauve
+        - CatppuccinMochaBlue
+        - CatppuccinMochaSapphire
+        - CatppuccinMochaPink
+        - CatppuccinMochaLavender
+
+    - name: Remove Catppuccin wallpaper
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/share/wallpapers/catppuccin-mocha.jpg"
+        state: absent
+
+    - name: Remove Catppuccin aurorae theme
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/share/aurorae/themes/{{ catppuccin_aurorae_theme }}"
+        state: absent
+
+    - name: Remove Catppuccin cursor theme
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/share/icons/catppuccin-mocha-{{ catppuccin_accent }}-cursors"
+        state: absent

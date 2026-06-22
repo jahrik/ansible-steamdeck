@@ -1,0 +1,38 @@
+---
+- name: Check dswarm wrapper exists
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.local/bin/dswarm"
+  register: dswarm_bin
+
+- name: Assert dswarm is installed
+  ansible.builtin.assert:
+    that: dswarm_bin.stat.exists
+
+- name: Check docker-cli binary exists
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.local/bin/docker-cli"
+  register: docker_cli_bin
+
+- name: Assert docker-cli is installed
+  ansible.builtin.assert:
+    that: docker_cli_bin.stat.exists
+
+- name: Check dind container is running
+  ansible.builtin.command: podman ps --filter name=dind --filter status=running --quiet
+  register: dind_running
+  changed_when: false
+
+- name: Assert dind container is running
+  ansible.builtin.assert:
+    that: dind_running.stdout != ''
+    fail_msg: "dind container is not running"
+
+- name: Check Docker Swarm is initialized
+  ansible.builtin.command: "{{ ansible_user_dir }}/.local/bin/docker-cli --host {{ dind_host }} info --format '{{ '{{' }}.Swarm.LocalNodeState{{ '}}' }}'"
+  register: swarm_state
+  changed_when: false
+
+- name: Assert Docker Swarm is initialized
+  ansible.builtin.assert:
+    that: swarm_state.stdout == 'active'
+    fail_msg: "Docker Swarm is not initialized (state: {{ swarm_state.stdout }})"

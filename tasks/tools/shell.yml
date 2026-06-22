@@ -1,0 +1,132 @@
+---
+- name: Install zoxide
+  when: install | default(true) | bool
+  block:
+    - name: Check if zoxide binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/bin/zoxide"
+      register: zoxide_bin
+
+    - name: Download zoxide archive
+      ansible.builtin.get_url:
+        url: "https://github.com/ajeetdsouza/zoxide/releases/download/v{{ zoxide_version }}/zoxide-{{ zoxide_version }}-x86_64-unknown-linux-musl.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/zoxide-{{ zoxide_version }}.tar.gz"
+        checksum: "{{ zoxide_checksum }}"
+        mode: '0644'
+      when: not zoxide_bin.stat.exists
+
+    - name: Extract zoxide binary
+      ansible.builtin.unarchive:
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/zoxide-{{ zoxide_version }}.tar.gz"
+        dest: "{{ ansible_user_dir }}/.local/bin"
+        include:
+          - zoxide
+        mode: '0755'
+        remote_src: true
+      when: not zoxide_bin.stat.exists
+
+    - name: Enable zoxide shell integration in zsh
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+        line: 'command -v zoxide >/dev/null && eval "$(zoxide init zsh)"'
+        create: true
+        mode: '0644'
+
+- name: Uninstall zoxide
+  when: not (install | default(true) | bool)
+  block:
+    - name: Remove zoxide binary
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/bin/zoxide"
+        state: absent
+
+    - name: Remove zoxide shell integration from zsh
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+        line: 'command -v zoxide >/dev/null && eval "$(zoxide init zsh)"'
+        state: absent
+
+- name: Install direnv
+  when: install | default(true) | bool
+  block:
+    - name: Check if direnv binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/bin/direnv"
+      register: direnv_bin
+
+    - name: Download direnv binary
+      ansible.builtin.get_url:
+        url: "https://github.com/direnv/direnv/releases/download/v{{ direnv_version }}/direnv.linux-amd64"
+        dest: "{{ ansible_user_dir }}/.local/bin/direnv"
+        checksum: "{{ direnv_checksum }}"
+        mode: '0755'
+      when: not direnv_bin.stat.exists
+
+    - name: Enable direnv shell integration in zsh
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+        line: 'command -v direnv >/dev/null && eval "$(direnv hook zsh)"'
+        create: true
+        mode: '0644'
+
+- name: Uninstall direnv
+  when: not (install | default(true) | bool)
+  block:
+    - name: Remove direnv binary
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/bin/direnv"
+        state: absent
+
+    - name: Remove direnv shell integration from zsh
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+        line: 'command -v direnv >/dev/null && eval "$(direnv hook zsh)"'
+        state: absent
+
+- name: Install tealdeer
+  when: install | default(true) | bool
+  block:
+    - name: Check if tldr binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/bin/tldr"
+      register: tldr_bin
+
+    - name: Download tldr binary
+      ansible.builtin.get_url:
+        url: "https://github.com/dbrgn/tealdeer/releases/download/v{{ tealdeer_version }}/tealdeer-linux-x86_64-musl"
+        dest: "{{ ansible_user_dir }}/.local/bin/tldr"
+        checksum: "{{ tealdeer_checksum }}"
+        mode: '0755'
+      when: not tldr_bin.stat.exists
+
+- name: Uninstall tealdeer
+  when: not (install | default(true) | bool)
+  block:
+    - name: Remove tldr binary
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/bin/tldr"
+        state: absent
+
+- name: Install yq
+  when: install | default(true) | bool
+  block:
+    - name: Check if yq binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/bin/yq"
+      register: yq_bin
+
+    - name: Download yq binary
+      ansible.builtin.get_url:
+        url: "https://github.com/mikefarah/yq/releases/download/v{{ yq_version }}/yq_linux_amd64"
+        dest: "{{ ansible_user_dir }}/.local/bin/yq"
+        checksum: "{{ yq_checksum }}"
+        mode: '0755'
+      when: not yq_bin.stat.exists
+
+- name: Uninstall yq
+  when: not (install | default(true) | bool)
+  block:
+    - name: Remove yq binary
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/bin/yq"
+        state: absent

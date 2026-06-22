@@ -1,0 +1,187 @@
+---
+- name: Install delta
+  when: install | default(true) | bool
+  block:
+    - name: Check if delta binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/bin/delta"
+      register: delta_bin
+
+    - name: Download delta archive
+      ansible.builtin.get_url:
+        url: "https://github.com/dandavison/delta/releases/download/{{ delta_version }}/delta-{{ delta_version }}-x86_64-unknown-linux-musl.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/delta-{{ delta_version }}.tar.gz"
+        checksum: "{{ delta_checksum }}"
+        mode: '0644'
+      when: not delta_bin.stat.exists
+
+    - name: Extract delta binary
+      ansible.builtin.unarchive:
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/delta-{{ delta_version }}.tar.gz"
+        dest: "{{ ansible_user_dir }}/.local/bin"
+        include:
+          - "delta-{{ delta_version }}-x86_64-unknown-linux-musl/delta"
+        extra_opts:
+          - --strip-components=1
+        mode: '0755'
+        remote_src: true
+      when: not delta_bin.stat.exists
+
+    - name: Set delta as git pager
+      community.general.git_config:
+        name: core.pager
+        value: delta
+        scope: global
+
+    - name: Ensure ~/.config/delta directory exists
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.config/delta"
+        state: directory
+        mode: '0755'
+
+    - name: Download Catppuccin delta theme
+      ansible.builtin.get_url:
+        url: "https://github.com/catppuccin/delta/raw/main/catppuccin.gitconfig"
+        dest: "{{ ansible_user_dir }}/.config/delta/catppuccin.gitconfig"
+        mode: '0644'
+
+    - name: Include Catppuccin delta theme in git config
+      community.general.git_config:
+        name: include.path
+        value: "{{ ansible_user_dir }}/.config/delta/catppuccin.gitconfig"
+        scope: global
+
+    - name: Enable Catppuccin Mocha delta feature
+      community.general.git_config:
+        name: delta.features
+        value: catppuccin-mocha
+        scope: global
+
+- name: Uninstall delta
+  when: not (install | default(true) | bool)
+  block:
+    - name: Remove delta binary
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/bin/delta"
+        state: absent
+
+    - name: Remove delta as git pager
+      community.general.git_config:
+        name: core.pager
+        state: absent
+        scope: global
+
+    - name: Remove Catppuccin delta feature
+      community.general.git_config:
+        name: delta.features
+        state: absent
+        scope: global
+
+    # Remove only our specific include, not any other include.path the user set.
+    # git_config state=absent would drop every include.path entry, so use --unset
+    # with an anchored regex matching exactly our file. argv avoids shell parsing,
+    # which would otherwise strip the regex_escape backslashes.
+    - name: Remove Catppuccin delta include
+      ansible.builtin.command:
+        argv:
+          - git
+          - config
+          - --global
+          - --unset
+          - include.path
+          - "^{{ (ansible_user_dir ~ '/.config/delta/catppuccin.gitconfig') | regex_escape }}$"
+      register: delta_include_unset
+      changed_when: delta_include_unset.rc == 0
+      failed_when: delta_include_unset.rc not in [0, 5]  # noqa: command-instead-of-module
+
+    - name: Remove delta config directory
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.config/delta"
+        state: absent
+
+- name: Install lazygit
+  when: install | default(true) | bool
+  block:
+    - name: Check if lazygit binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/bin/lazygit"
+      register: lazygit_bin
+
+    - name: Download lazygit archive
+      ansible.builtin.get_url:
+        url: "https://github.com/jesseduffield/lazygit/releases/download/v{{ lazygit_version }}/lazygit_{{ lazygit_version }}_Linux_x86_64.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/lazygit-{{ lazygit_version }}.tar.gz"
+        checksum: "{{ lazygit_checksum }}"
+        mode: '0644'
+      when: not lazygit_bin.stat.exists
+
+    - name: Extract lazygit binary
+      ansible.builtin.unarchive:
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/lazygit-{{ lazygit_version }}.tar.gz"
+        dest: "{{ ansible_user_dir }}/.local/bin"
+        include:
+          - lazygit
+        mode: '0755'
+        remote_src: true
+      when: not lazygit_bin.stat.exists
+
+    - name: Ensure ~/.config/lazygit directory exists
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.config/lazygit"
+        state: directory
+        mode: '0755'
+
+    - name: Deploy Catppuccin Mocha lazygit config
+      ansible.builtin.copy:
+        src: lazygit-config.yml
+        dest: "{{ ansible_user_dir }}/.config/lazygit/config.yml"
+        mode: '0644'
+
+- name: Uninstall lazygit
+  when: not (install | default(true) | bool)
+  block:
+    - name: Remove lazygit binary
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/bin/lazygit"
+        state: absent
+
+    - name: Remove lazygit config
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.config/lazygit"
+        state: absent
+
+- name: Install gh
+  when: install | default(true) | bool
+  block:
+    - name: Check if gh binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_user_dir }}/.local/bin/gh"
+      register: gh_bin
+
+    - name: Download gh archive
+      ansible.builtin.get_url:
+        url: "https://github.com/cli/cli/releases/download/v{{ gh_version }}/gh_{{ gh_version }}_linux_amd64.tar.gz"
+        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/gh-{{ gh_version }}.tar.gz"
+        checksum: "{{ gh_checksum }}"
+        mode: '0644'
+      when: not gh_bin.stat.exists
+
+    - name: Extract gh binary
+      ansible.builtin.unarchive:
+        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/gh-{{ gh_version }}.tar.gz"
+        dest: "{{ ansible_user_dir }}/.local/bin"
+        include:
+          - "gh_{{ gh_version }}_linux_amd64/bin/gh"
+        extra_opts:
+          - --strip-components=2
+        mode: '0755'
+        remote_src: true
+      when: not gh_bin.stat.exists
+
+- name: Uninstall gh
+  when: not (install | default(true) | bool)
+  block:
+    - name: Remove gh binary
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.local/bin/gh"
+        state: absent

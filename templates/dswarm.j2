@@ -1,0 +1,5 @@
+#!/bin/bash
+# {{ ansible_managed }}
+# Real docker CLI against the local {{ dind_image }} swarm (podman container "{{ dind_name }}").
+# Start after reboot with: podman start {{ dind_name }}
+exec env DOCKER_HOST={{ dind_host }} "$HOME/.local/bin/docker-cli" "$@"
