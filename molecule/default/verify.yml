@@ -104,3 +104,40 @@
     - name: Check konsolerc sets default profile
       ansible.builtin.command: grep -q "DefaultProfile.*Default.profile" ~/.config/konsolerc
       changed_when: false
+
+    - name: Check alacritty version
+      ansible.builtin.command: ~/.local/bin/alacritty --version
+      register: alacritty_version
+      changed_when: false
+      failed_when: false
+
+    - name: Assert alacritty version output
+      ansible.builtin.assert:
+        that: alacritty_version.rc == 0
+
+    - name: Check standard tool versions
+      ansible.builtin.command: "{{ item }} --version"
+      register: tool_versions
+      changed_when: false
+      loop:
+        - ~/.local/bin/zsh
+        - ~/.local/bin/nvim
+        - ~/.local/bin/fzf
+        - ~/.local/bin/rg
+        - ~/.local/bin/fd
+        - ~/.local/bin/bat
+        - ~/.local/bin/eza
+        - ~/.local/bin/zoxide
+        - ~/.local/bin/direnv
+        - ~/.local/bin/tldr
+        - ~/.local/bin/yq
+        - ~/.local/bin/delta
+        - ~/.local/bin/lazygit
+        - ~/.local/bin/gh
+        - ~/.local/bin/uv
+        - ~/.local/go/bin/go
+
+    - name: Assert tool versions
+      ansible.builtin.assert:
+        that: item.rc == 0
+      loop: "{{ tool_versions.results }}"

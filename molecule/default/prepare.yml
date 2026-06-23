@@ -8,6 +8,7 @@
         upgrade: true
         update_cache: true
       changed_when: false
+      when: ansible_os_family == 'Archlinux'
 
     - name: Install prerequisites
       become: true

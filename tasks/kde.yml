@@ -140,8 +140,8 @@
           --group org.kde.kdecoration2
           --key {{ item.key }} {{ item.value }}
       loop:
-        - { key: library, value: org.kde.kwin.aurorae }
-        - { key: theme, value: "__aurorae__svg__{{ catppuccin_aurorae_theme }}" }
+        - {key: library, value: org.kde.kwin.aurorae}
+        - {key: theme, value: "__aurorae__svg__{{ catppuccin_aurorae_theme }}"}
       when: kwin_deco.stdout != '__aurorae__svg__' + catppuccin_aurorae_theme
       changed_when: true
       notify: Reconfigure KWin
@@ -212,16 +212,39 @@
     - not (install | default(true) | bool)
     - kde_tooling.rc == 0
   block:
+    - name: Check current color scheme for reset
+      ansible.builtin.command:
+        cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kdeglobals --group General --key ColorScheme
+      register: current_scheme_reset
+      changed_when: false
+      failed_when: false
+
     - name: Reset color scheme to Breeze Dark
       ansible.builtin.command:
         cmd: plasma-apply-colorscheme BreezeDark
+      when: current_scheme_reset.stdout != 'BreezeDark'
       changed_when: true
+      failed_when: false
+
+    - name: Check current cursor theme for reset
+      ansible.builtin.command:
+        cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kcminputrc --group Mouse --key cursorTheme
+      register: cursor_theme_reset
+      changed_when: false
       failed_when: false
 
     - name: Reset cursor theme to Breeze
       ansible.builtin.command:
         cmd: plasma-apply-cursortheme breeze_cursors
+      when: cursor_theme_reset.stdout != 'breeze_cursors'
       changed_when: true
+      failed_when: false
+
+    - name: Check current icon theme for reset
+      ansible.builtin.command:
+        cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kdeglobals --group Icons --key Theme
+      register: icon_theme_reset
+      changed_when: false
       failed_when: false
 
     - name: Reset icon theme to breeze-dark
@@ -230,8 +253,16 @@
           kwriteconfig6
           --file {{ ansible_user_dir }}/.config/kdeglobals
           --group Icons --key Theme breeze-dark
+      when: icon_theme_reset.stdout != 'breeze-dark'
       changed_when: true
       notify: Rebuild KDE system configuration cache
+
+    - name: Check current window decoration for reset
+      ansible.builtin.command:
+        cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kwinrc --group org.kde.kdecoration2 --key theme
+      register: kwin_deco_reset
+      changed_when: false
+      failed_when: false
 
     - name: Reset window decoration to Breeze
       ansible.builtin.command:
@@ -240,8 +271,9 @@
           --file {{ ansible_user_dir }}/.config/kwinrc
           --group org.kde.kdecoration2 --key {{ item.key }} {{ item.value }}
       loop:
-        - { key: library, value: org.kde.breeze }
-        - { key: theme, value: Breeze }
+        - {key: library, value: org.kde.breeze}
+        - {key: theme, value: Breeze}
+      when: kwin_deco_reset.stdout != 'Breeze'
       changed_when: true
       notify: Reconfigure KWin
 

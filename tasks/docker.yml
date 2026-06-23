@@ -145,13 +145,15 @@
     - name: Stop dind container
       ansible.builtin.command:
         cmd: podman stop {{ dind_name }}
-      changed_when: true
+      register: dind_stop
+      changed_when: dind_stop.rc == 0
       failed_when: false
 
     - name: Remove dind container
       ansible.builtin.command:
         cmd: podman rm {{ dind_name }}
-      changed_when: true
+      register: dind_rm
+      changed_when: dind_rm.rc == 0
       failed_when: false
 
     - name: Remove docker-cli binary

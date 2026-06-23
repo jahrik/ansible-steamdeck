@@ -4,3 +4,6 @@ roles:
   - name: jahrik.alacritty
   - name: jahrik.nvim
   - name: jahrik.zsh
+
+collections:
+  - name: community.general

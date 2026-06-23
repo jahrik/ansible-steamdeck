@@ -23,6 +23,7 @@ Everything works within SteamOS's read-only rootfs: binaries to `~/.local/bin`, 
   * [KDE Plasma](#kde-plasma)
 * [Dependencies](#dependencies)
 * [Example Playbook](#example-playbook)
+* [Testing](#testing)
 * [License](#license)
 * [Notes](#notes)
   * [Desktop Mode](#desktop-mode)
@@ -123,6 +124,16 @@ To uninstall:
     install: false
   roles:
     - role: jahrik.steamdeck
+```
+
+## Testing
+
+```bash
+uv sync
+source .venv/bin/activate
+yamllint .
+ansible-lint
+molecule test
 ```
 
 ## License
