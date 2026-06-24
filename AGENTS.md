@@ -87,7 +87,7 @@ Shims deployed to `~/.local/bin/`:
 | `dswarm` | Runs static `docker-cli` against the dind swarm (`DOCKER_HOST=tcp://127.0.0.1:2375`) |
 | `mtest` | Runs `molecule` with Podman socket and venv PATH; clears stale role cache automatically |
 
-## Commands
+## Usage
 
 ```bash
 # Install Galaxy role dependencies
@@ -98,20 +98,16 @@ ansible-playbook playbook.yml -i inventory.ini
 
 # Uninstall
 ansible-playbook playbook.yml -i inventory.ini -e install=false
+```
 
-# Install test dependencies and activate venv
+## Testing
+
+```bash
 uv sync
 source .venv/bin/activate
-
-# Lint
 yamllint .
 ansible-lint
-
-# Test with Molecule (Docker, Arch — exercises the non-SteamOS code path)
 molecule test
-
-# Test against this machine directly (only meaningful when run on an actual Steam Deck)
-molecule test -s localhost
 ```
 
 ## Molecule Scenarios
