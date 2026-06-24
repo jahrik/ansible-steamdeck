@@ -129,43 +129,39 @@ To uninstall:
 
 GPLv2
 
-## Notes
+## Usage
 
-### Desktop Mode
+Switch the Steam Deck to Desktop Mode (hold the power button → **Switch to Desktop**) and open Konsole.
 
-Switch the Steam Deck to Desktop Mode: hold the power button → **Switch to Desktop**.
+Install Ansible into a user venv (SteamOS's rootfs is read-only):
 
-Open Konsole (the KDE terminal). Everything below runs in that terminal.
+```bash
+python3 -m venv ~/.venv/ansible
+source ~/.venv/ansible/bin/activate
+pip install ansible
+```
 
-### Install Ansible
+Clone the repo and run the playbook:
 
-SteamOS's rootfs is read-only, so install Ansible into a user venv:
+```bash
+git clone https://github.com/jahrik/ansible-steamdeck.git
+cd ansible-steamdeck
+ansible-galaxy install -r requirements.yml
+ansible-playbook playbook.yml -i inventory.ini
+```
 
-    python3 -m venv ~/.venv/ansible
-    source ~/.venv/ansible/bin/activate
-    pip install ansible
+To uninstall:
 
-Activate it each session before running the playbook:
+```bash
+ansible-playbook playbook.yml -i inventory.ini -e install=false
+```
 
-    source ~/.venv/ansible/bin/activate
+## Testing
 
-### Clone and Run
-
-Clone this repo:
-
-    git clone https://github.com/jahrik/ansible-steamdeck.git
-    cd ansible-steamdeck
-
-Install Galaxy dependencies:
-
-    ansible-galaxy install -r requirements.yml
-
-Run the playbook against localhost (no sudo needed):
-
-    ansible-playbook playbook.yml -i inventory.ini
-
-### Uninstall
-
-Set `install: false` to remove everything installed by the role:
-
-    ansible-playbook playbook.yml -i inventory.ini -e install=false
+```bash
+uv sync
+source .venv/bin/activate
+yamllint .
+ansible-lint
+molecule test
+```
