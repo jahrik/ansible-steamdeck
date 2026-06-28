@@ -4,21 +4,21 @@
   block:
     - name: Check if uv binary exists
       ansible.builtin.stat:
-        path: "{{ ansible_user_dir }}/.local/bin/uv"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/uv"
       register: uv_bin
 
     - name: Download uv archive
       ansible.builtin.get_url:
         url: "https://github.com/astral-sh/uv/releases/download/{{ uv_version }}/uv-x86_64-unknown-linux-gnu.tar.gz"
-        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/uv-{{ uv_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/uv-{{ uv_version }}.tar.gz"
         checksum: "{{ uv_checksum }}"
         mode: '0644'
       when: not uv_bin.stat.exists
 
     - name: Extract uv binaries
       ansible.builtin.unarchive:
-        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/uv-{{ uv_version }}.tar.gz"
-        dest: "{{ ansible_user_dir }}/.local/bin"
+        src: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/uv-{{ uv_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin"
         include:
           - uv-x86_64-unknown-linux-gnu/uv
           - uv-x86_64-unknown-linux-gnu/uvx
@@ -33,7 +33,7 @@
   block:
     - name: Remove uv binaries
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/bin/{{ item }}"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/{{ item }}"
         state: absent
       loop:
         - uv
@@ -44,27 +44,27 @@
   block:
     - name: Check if go binary exists
       ansible.builtin.stat:
-        path: "{{ ansible_user_dir }}/.local/go/bin/go"
+        path: "{{ ansible_facts['user_dir'] }}/.local/go/bin/go"
       register: go_bin
 
     - name: Download Go archive
       ansible.builtin.get_url:
         url: "https://dl.google.com/go/go{{ go_version }}.linux-amd64.tar.gz"
-        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/go-{{ go_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/go-{{ go_version }}.tar.gz"
         checksum: "{{ go_checksum }}"
         mode: '0644'
       when: not go_bin.stat.exists
 
     - name: Extract Go toolchain
       ansible.builtin.unarchive:
-        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/go-{{ go_version }}.tar.gz"
-        dest: "{{ ansible_user_dir }}/.local"
+        src: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/go-{{ go_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.local"
         remote_src: true
       when: not go_bin.stat.exists
 
     - name: Add Go bin to PATH in zsh
       ansible.builtin.lineinfile:
-        path: "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+        path: "{{ ansible_facts['user_dir'] }}/.config/zsh/local.zsh"
         line: 'export PATH="$HOME/.local/go/bin:$HOME/go/bin:$PATH"'
         create: true
         mode: '0644'
@@ -74,11 +74,11 @@
   block:
     - name: Remove Go toolchain
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/go"
+        path: "{{ ansible_facts['user_dir'] }}/.local/go"
         state: absent
 
     - name: Remove Go PATH from zsh
       ansible.builtin.lineinfile:
-        path: "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+        path: "{{ ansible_facts['user_dir'] }}/.config/zsh/local.zsh"
         line: 'export PATH="$HOME/.local/go/bin:$HOME/go/bin:$PATH"'
         state: absent

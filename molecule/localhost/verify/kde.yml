@@ -1,7 +1,7 @@
 ---
 - name: Check Catppuccin color scheme file exists
   ansible.builtin.stat:
-    path: "{{ ansible_user_dir }}/.local/share/color-schemes/CatppuccinMochaMauve.colors"
+    path: "{{ ansible_facts['user_dir'] }}/.local/share/color-schemes/CatppuccinMochaMauve.colors"
   register: kde_colorscheme_file
 
 - name: Assert Catppuccin color scheme is installed
@@ -10,7 +10,7 @@
 
 - name: Check active KDE color scheme
   ansible.builtin.command:
-    cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kdeglobals --group General --key ColorScheme
+    cmd: kreadconfig6 --file {{ ansible_facts['user_dir'] }}/.config/kdeglobals --group General --key ColorScheme
   register: kde_active_scheme
   changed_when: false
 
@@ -21,7 +21,7 @@
 
 - name: Check wallpaper file exists
   ansible.builtin.stat:
-    path: "{{ ansible_user_dir }}/.local/share/wallpapers/catppuccin-mocha.jpg"
+    path: "{{ ansible_facts['user_dir'] }}/.local/share/wallpapers/catppuccin-mocha.jpg"
   register: kde_wallpaper_file
 
 - name: Assert wallpaper is installed
@@ -30,7 +30,7 @@
 
 - name: Read Plasma applets config
   ansible.builtin.slurp:
-    src: "{{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc"
+    src: "{{ ansible_facts['user_dir'] }}/.config/plasma-org.kde.plasma.desktop-appletsrc"
   register: verify_appletsrc
 
 - name: Find plasma panel containment ID
@@ -41,7 +41,7 @@
   ansible.builtin.command:
     cmd: >
       kreadconfig6
-      --file {{ ansible_user_dir }}/.config/plasma-org.kde.plasma.desktop-appletsrc
+      --file {{ ansible_facts['user_dir'] }}/.config/plasma-org.kde.plasma.desktop-appletsrc
       --group Containments --group {{ verify_panel_id }} --key location
   register: kde_panel_location
   changed_when: false
@@ -53,7 +53,7 @@
 
 - name: Check window decoration theme
   ansible.builtin.command:
-    cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kwinrc --group org.kde.kdecoration2 --key theme
+    cmd: kreadconfig6 --file {{ ansible_facts['user_dir'] }}/.config/kwinrc --group org.kde.kdecoration2 --key theme
   register: kde_deco
   changed_when: false
 
@@ -64,7 +64,7 @@
 
 - name: Check cursor theme
   ansible.builtin.command:
-    cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kcminputrc --group Mouse --key cursorTheme
+    cmd: kreadconfig6 --file {{ ansible_facts['user_dir'] }}/.config/kcminputrc --group Mouse --key cursorTheme
   register: kde_cursor
   changed_when: false
 
@@ -75,7 +75,7 @@
 
 - name: Check icon theme
   ansible.builtin.command:
-    cmd: kreadconfig6 --file {{ ansible_user_dir }}/.config/kdeglobals --group Icons --key Theme
+    cmd: kreadconfig6 --file {{ ansible_facts['user_dir'] }}/.config/kdeglobals --group Icons --key Theme
   register: kde_icons
   changed_when: false
 

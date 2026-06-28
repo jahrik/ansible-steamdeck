@@ -64,7 +64,7 @@ dind_name: dind
 dind_host: tcp://127.0.0.1:2375
 
 konsole_profile_name: Default
-konsole_shell: "{{ ansible_user_dir }}/.local/bin/zsh"
+konsole_shell: "{{ ansible_facts['user_dir'] }}/.local/bin/zsh"
 konsole_color_scheme: Catppuccin Mocha
 konsole_font: DejaVu Sans Mono
 konsole_font_size: 18
