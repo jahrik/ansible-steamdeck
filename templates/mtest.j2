@@ -12,6 +12,6 @@ if [[ -e "$ROLE_CACHE/$ROLE_NAME" && ! -L "$ROLE_CACHE/$ROLE_NAME" ]]; then
 fi
 
 exec env \
-  DOCKER_HOST=unix:///run/user/{{ ansible_user_uid }}/podman/podman.sock \
+  DOCKER_HOST=unix:///run/user/{{ ansible_facts['user_uid'] }}/podman/podman.sock \
   PATH="$HOME/.local/bin:$HOME/.venv/ansible/bin:$PATH" \
   molecule "${@:-test}"
