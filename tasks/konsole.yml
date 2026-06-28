@@ -4,26 +4,26 @@
   block:
     - name: Ensure ~/.local/share/konsole exists
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/share/konsole"
+        path: "{{ ansible_facts['user_dir'] }}/.local/share/konsole"
         state: directory
         mode: '0755'
 
     - name: Download Catppuccin Mocha color scheme
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/catppuccin/konsole/main/themes/catppuccin-mocha.colorscheme
-        dest: "{{ ansible_user_dir }}/.local/share/konsole/catppuccin-mocha.colorscheme"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/share/konsole/catppuccin-mocha.colorscheme"
         mode: '0644'
 
     - name: Deploy Konsole profile
       ansible.builtin.template:
         src: konsole.profile.j2
-        dest: "{{ ansible_user_dir }}/.local/share/konsole/{{ konsole_profile_name }}.profile"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/share/konsole/{{ konsole_profile_name }}.profile"
         mode: '0644'
       notify: Rebuild KDE system configuration cache
 
     - name: Set default Konsole profile
       community.general.ini_file:
-        path: "{{ ansible_user_dir }}/.config/konsolerc"
+        path: "{{ ansible_facts['user_dir'] }}/.config/konsolerc"
         section: Desktop Entry
         option: DefaultProfile
         value: "{{ konsole_profile_name }}.profile"
@@ -35,17 +35,17 @@
   block:
     - name: Remove Konsole profile
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/share/konsole/{{ konsole_profile_name }}.profile"
+        path: "{{ ansible_facts['user_dir'] }}/.local/share/konsole/{{ konsole_profile_name }}.profile"
         state: absent
 
     - name: Remove Catppuccin Mocha color scheme
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/share/konsole/catppuccin-mocha.colorscheme"
+        path: "{{ ansible_facts['user_dir'] }}/.local/share/konsole/catppuccin-mocha.colorscheme"
         state: absent
 
     - name: Remove default Konsole profile setting
       community.general.ini_file:
-        path: "{{ ansible_user_dir }}/.config/konsolerc"
+        path: "{{ ansible_facts['user_dir'] }}/.config/konsolerc"
         section: Desktop Entry
         option: DefaultProfile
         state: absent

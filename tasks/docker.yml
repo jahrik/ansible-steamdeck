@@ -7,7 +7,7 @@
 - name: Setup Docker/dind
   when:
     - install | default(true) | bool
-    - ansible_distribution_release == 'holo'
+    - ansible_facts['distribution_release'] == 'holo'
     - user_runtime_dir.stat.exists
   block:
     - name: Enable podman user socket
@@ -19,19 +19,19 @@
 
     - name: Ensure ~/.config/dind directory exists
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.config/dind"
+        path: "{{ ansible_facts['user_dir'] }}/.config/dind"
         state: directory
         mode: '0755'
 
     - name: Deploy Docker daemon config
       ansible.builtin.copy:
         src: daemon.json
-        dest: "{{ ansible_user_dir }}/.config/dind/daemon.json"
+        dest: "{{ ansible_facts['user_dir'] }}/.config/dind/daemon.json"
         mode: '0644'
 
     - name: Check if docker-cli exists
       ansible.builtin.stat:
-        path: "{{ ansible_user_dir }}/.local/bin/docker-cli"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/docker-cli"
       register: docker_cli_bin
 
     - name: Install docker-cli static binary
@@ -54,26 +54,26 @@
         - name: Install docker-cli
           ansible.builtin.copy:
             src: /tmp/docker/docker
-            dest: "{{ ansible_user_dir }}/.local/bin/docker-cli"
+            dest: "{{ ansible_facts['user_dir'] }}/.local/bin/docker-cli"
             mode: '0755'
             remote_src: true
 
     - name: Deploy docker shim
       ansible.builtin.template:
         src: docker.j2
-        dest: "{{ ansible_user_dir }}/.local/bin/docker"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin/docker"
         mode: '0755'
 
     - name: Deploy dswarm wrapper
       ansible.builtin.template:
         src: dswarm.j2
-        dest: "{{ ansible_user_dir }}/.local/bin/dswarm"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin/dswarm"
         mode: '0755'
 
     - name: Deploy mtest wrapper
       ansible.builtin.template:
         src: mtest.j2
-        dest: "{{ ansible_user_dir }}/.local/bin/mtest"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin/mtest"
         mode: '0755'
 
     - name: Pull docker:dind image
@@ -97,7 +97,7 @@
           --network=host
           -e DOCKER_TLS_CERTDIR=
           -e DOCKER_IGNORE_BR_NETFILTER_ERROR=1
-          -v {{ ansible_user_dir }}/.config/dind/daemon.json:/etc/docker/daemon.json:ro
+          -v {{ ansible_facts['user_dir'] }}/.config/dind/daemon.json:/etc/docker/daemon.json:ro
           {{ dind_image }}
       changed_when: true
       when: dind_exists.rc != 0
@@ -117,7 +117,7 @@
 
     - name: Wait for Docker daemon to be ready
       ansible.builtin.command:
-        cmd: "{{ ansible_user_dir }}/.local/bin/docker-cli --host {{ dind_host }} info"
+        cmd: "{{ ansible_facts['user_dir'] }}/.local/bin/docker-cli --host {{ dind_host }} info"
       register: docker_info
       until: docker_info.rc == 0
       retries: 15
@@ -126,21 +126,21 @@
 
     - name: Check if Docker Swarm is initialized
       ansible.builtin.command:
-        cmd: "{{ ansible_user_dir }}/.local/bin/docker-cli --host {{ dind_host }} info --format '{{ '{{' }}.Swarm.LocalNodeState{{ '}}' }}'"
+        cmd: "{{ ansible_facts['user_dir'] }}/.local/bin/docker-cli --host {{ dind_host }} info --format '{{ '{{' }}.Swarm.LocalNodeState{{ '}}' }}'"
       register: swarm_state
       changed_when: false
       failed_when: false
 
     - name: Initialize Docker Swarm
       ansible.builtin.command:
-        cmd: "{{ ansible_user_dir }}/.local/bin/docker-cli --host {{ dind_host }} swarm init"
+        cmd: "{{ ansible_facts['user_dir'] }}/.local/bin/docker-cli --host {{ dind_host }} swarm init"
       changed_when: true
       when: swarm_state.stdout != 'active'
 
 - name: Teardown Docker/dind
   when:
     - not (install | default(true) | bool)
-    - ansible_distribution_release == 'holo'
+    - ansible_facts['distribution_release'] == 'holo'
   block:
     - name: Stop dind container
       ansible.builtin.command:
@@ -156,20 +156,20 @@
 
     - name: Remove docker-cli binary
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/bin/docker-cli"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/docker-cli"
         state: absent
 
     - name: Remove docker shim
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/bin/docker"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/docker"
         state: absent
 
     - name: Remove dswarm wrapper
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/bin/dswarm"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/dswarm"
         state: absent
 
     - name: Remove mtest wrapper
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/bin/mtest"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/mtest"
         state: absent

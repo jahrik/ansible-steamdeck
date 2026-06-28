@@ -3,7 +3,7 @@
   ansible.builtin.command: kbuildsycoca6 --noincremental
   changed_when: false
   failed_when: false
-  when: ansible_distribution_release == 'holo'
+  when: ansible_facts['distribution_release'] == 'holo'
 
 - name: Restart plasmashell
   ansible.builtin.systemd:
@@ -12,11 +12,11 @@
     state: restarted
   changed_when: false
   failed_when: false
-  when: ansible_distribution_release == 'holo'
+  when: ansible_facts['distribution_release'] == 'holo'
 
 - name: Rebuild bat theme cache
   ansible.builtin.command:
-    cmd: "{{ ansible_user_dir }}/.local/bin/bat cache --build"
+    cmd: "{{ ansible_facts['user_dir'] }}/.local/bin/bat cache --build"
   changed_when: true
 
 - name: Reconfigure KWin
@@ -24,4 +24,4 @@
     cmd: qdbus org.kde.KWin /KWin reconfigure
   changed_when: false
   failed_when: false
-  when: ansible_distribution_release == 'holo'
+  when: ansible_facts['distribution_release'] == 'holo'

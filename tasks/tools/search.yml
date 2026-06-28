@@ -4,21 +4,21 @@
   block:
     - name: Check if fzf binary exists
       ansible.builtin.stat:
-        path: "{{ ansible_user_dir }}/.local/bin/fzf"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/fzf"
       register: fzf_bin
 
     - name: Download fzf archive
       ansible.builtin.get_url:
         url: "https://github.com/junegunn/fzf/releases/download/v{{ fzf_version }}/fzf-{{ fzf_version }}-linux_amd64.tar.gz"
-        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/fzf-{{ fzf_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/fzf-{{ fzf_version }}.tar.gz"
         checksum: "{{ fzf_checksum }}"
         mode: '0644'
       when: not fzf_bin.stat.exists
 
     - name: Extract fzf binary
       ansible.builtin.unarchive:
-        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/fzf-{{ fzf_version }}.tar.gz"
-        dest: "{{ ansible_user_dir }}/.local/bin"
+        src: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/fzf-{{ fzf_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin"
         include:
           - fzf
         mode: '0755'
@@ -27,26 +27,26 @@
 
     - name: Enable fzf shell integration in zsh
       ansible.builtin.lineinfile:
-        path: "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+        path: "{{ ansible_facts['user_dir'] }}/.config/zsh/local.zsh"
         line: 'command -v fzf >/dev/null && eval "$(fzf --zsh)"'
         create: true
         mode: '0644'
 
     - name: Ensure ~/.config/fzf directory exists
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.config/fzf"
+        path: "{{ ansible_facts['user_dir'] }}/.config/fzf"
         state: directory
         mode: '0755'
 
     - name: Download Catppuccin Mocha fzf theme
       ansible.builtin.get_url:
         url: "https://github.com/catppuccin/fzf/raw/main/themes/catppuccin-fzf-mocha.sh"
-        dest: "{{ ansible_user_dir }}/.config/fzf/catppuccin-mocha.sh"
+        dest: "{{ ansible_facts['user_dir'] }}/.config/fzf/catppuccin-mocha.sh"
         mode: '0644'
 
     - name: Source fzf Catppuccin theme in zsh
       ansible.builtin.lineinfile:
-        path: "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+        path: "{{ ansible_facts['user_dir'] }}/.config/zsh/local.zsh"
         line: '[ -f "$HOME/.config/fzf/catppuccin-mocha.sh" ] && source "$HOME/.config/fzf/catppuccin-mocha.sh"'
         create: true
         mode: '0644'
@@ -56,24 +56,24 @@
   block:
     - name: Remove fzf binary
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/bin/fzf"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/fzf"
         state: absent
 
     - name: Remove fzf shell integration from zsh
       ansible.builtin.lineinfile:
-        path: "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+        path: "{{ ansible_facts['user_dir'] }}/.config/zsh/local.zsh"
         line: 'command -v fzf >/dev/null && eval "$(fzf --zsh)"'
         state: absent
 
     - name: Remove fzf Catppuccin theme source from zsh
       ansible.builtin.lineinfile:
-        path: "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+        path: "{{ ansible_facts['user_dir'] }}/.config/zsh/local.zsh"
         line: '[ -f "$HOME/.config/fzf/catppuccin-mocha.sh" ] && source "$HOME/.config/fzf/catppuccin-mocha.sh"'
         state: absent
 
     - name: Remove fzf config directory
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.config/fzf"
+        path: "{{ ansible_facts['user_dir'] }}/.config/fzf"
         state: absent
 
 - name: Install ripgrep
@@ -81,21 +81,21 @@
   block:
     - name: Check if rg binary exists
       ansible.builtin.stat:
-        path: "{{ ansible_user_dir }}/.local/bin/rg"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/rg"
       register: rg_bin
 
     - name: Download ripgrep archive
       ansible.builtin.get_url:
         url: "https://github.com/BurntSushi/ripgrep/releases/download/{{ ripgrep_version }}/ripgrep-{{ ripgrep_version }}-x86_64-unknown-linux-musl.tar.gz"
-        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/ripgrep-{{ ripgrep_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/ripgrep-{{ ripgrep_version }}.tar.gz"
         checksum: "{{ ripgrep_checksum }}"
         mode: '0644'
       when: not rg_bin.stat.exists
 
     - name: Extract rg binary
       ansible.builtin.unarchive:
-        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/ripgrep-{{ ripgrep_version }}.tar.gz"
-        dest: "{{ ansible_user_dir }}/.local/bin"
+        src: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/ripgrep-{{ ripgrep_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin"
         include:
           - "ripgrep-{{ ripgrep_version }}-x86_64-unknown-linux-musl/rg"
         extra_opts:
@@ -109,7 +109,7 @@
   block:
     - name: Remove rg binary
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/bin/rg"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/rg"
         state: absent
 
 - name: Install fd
@@ -117,21 +117,21 @@
   block:
     - name: Check if fd binary exists
       ansible.builtin.stat:
-        path: "{{ ansible_user_dir }}/.local/bin/fd"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/fd"
       register: fd_bin
 
     - name: Download fd archive
       ansible.builtin.get_url:
         url: "https://github.com/sharkdp/fd/releases/download/v{{ fd_version }}/fd-v{{ fd_version }}-x86_64-unknown-linux-musl.tar.gz"
-        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/fd-{{ fd_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/fd-{{ fd_version }}.tar.gz"
         checksum: "{{ fd_checksum }}"
         mode: '0644'
       when: not fd_bin.stat.exists
 
     - name: Extract fd binary
       ansible.builtin.unarchive:
-        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/fd-{{ fd_version }}.tar.gz"
-        dest: "{{ ansible_user_dir }}/.local/bin"
+        src: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/fd-{{ fd_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin"
         include:
           - "fd-v{{ fd_version }}-x86_64-unknown-linux-musl/fd"
         extra_opts:
@@ -145,7 +145,7 @@
   block:
     - name: Remove fd binary
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/bin/fd"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/fd"
         state: absent
 
 - name: Install bat
@@ -153,21 +153,21 @@
   block:
     - name: Check if bat binary exists
       ansible.builtin.stat:
-        path: "{{ ansible_user_dir }}/.local/bin/bat"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/bat"
       register: bat_bin
 
     - name: Download bat archive
       ansible.builtin.get_url:
         url: "https://github.com/sharkdp/bat/releases/download/v{{ bat_version }}/bat-v{{ bat_version }}-x86_64-unknown-linux-musl.tar.gz"
-        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/bat-{{ bat_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/bat-{{ bat_version }}.tar.gz"
         checksum: "{{ bat_checksum }}"
         mode: '0644'
       when: not bat_bin.stat.exists
 
     - name: Extract bat binary
       ansible.builtin.unarchive:
-        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/bat-{{ bat_version }}.tar.gz"
-        dest: "{{ ansible_user_dir }}/.local/bin"
+        src: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/bat-{{ bat_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin"
         include:
           - "bat-v{{ bat_version }}-x86_64-unknown-linux-musl/bat"
         extra_opts:
@@ -178,20 +178,20 @@
 
     - name: Ensure bat themes directory exists
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.config/bat/themes"
+        path: "{{ ansible_facts['user_dir'] }}/.config/bat/themes"
         state: directory
         mode: '0755'
 
     - name: Download Catppuccin Mocha bat theme
       ansible.builtin.get_url:
         url: "https://github.com/catppuccin/bat/raw/main/themes/Catppuccin%20Mocha.tmTheme"
-        dest: "{{ ansible_user_dir }}/.config/bat/themes/Catppuccin Mocha.tmTheme"
+        dest: "{{ ansible_facts['user_dir'] }}/.config/bat/themes/Catppuccin Mocha.tmTheme"
         mode: '0644'
       notify: Rebuild bat theme cache
 
     - name: Set Catppuccin Mocha as bat theme
       ansible.builtin.lineinfile:
-        path: "{{ ansible_user_dir }}/.config/bat/config"
+        path: "{{ ansible_facts['user_dir'] }}/.config/bat/config"
         line: '--theme="Catppuccin Mocha"'
         create: true
         mode: '0644'
@@ -201,12 +201,12 @@
   block:
     - name: Remove bat binary
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/bin/bat"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/bat"
         state: absent
 
     - name: Remove bat config and themes
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.config/bat"
+        path: "{{ ansible_facts['user_dir'] }}/.config/bat"
         state: absent
 
 - name: Install eza
@@ -214,28 +214,28 @@
   block:
     - name: Check if eza binary exists
       ansible.builtin.stat:
-        path: "{{ ansible_user_dir }}/.local/bin/eza"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/eza"
       register: eza_bin
 
     - name: Download eza archive
       ansible.builtin.get_url:
         url: "https://github.com/eza-community/eza/releases/download/v{{ eza_version }}/eza_x86_64-unknown-linux-musl.tar.gz"
-        dest: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/eza-{{ eza_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/eza-{{ eza_version }}.tar.gz"
         checksum: "{{ eza_checksum }}"
         mode: '0644'
       when: not eza_bin.stat.exists
 
     - name: Extract eza binary
       ansible.builtin.unarchive:
-        src: "{{ ansible_user_dir }}/.cache/ansible-steamdeck/eza-{{ eza_version }}.tar.gz"
-        dest: "{{ ansible_user_dir }}/.local/bin"
+        src: "{{ ansible_facts['user_dir'] }}/.cache/ansible-steamdeck/eza-{{ eza_version }}.tar.gz"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin"
         mode: '0755'
         remote_src: true
       when: not eza_bin.stat.exists
 
     - name: Add eza aliases to zsh
       ansible.builtin.lineinfile:
-        path: "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+        path: "{{ ansible_facts['user_dir'] }}/.config/zsh/local.zsh"
         line: "{{ item }}"
         create: true
         mode: '0644'
@@ -249,12 +249,12 @@
   block:
     - name: Remove eza binary
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.local/bin/eza"
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/eza"
         state: absent
 
     - name: Remove eza aliases from zsh
       ansible.builtin.lineinfile:
-        path: "{{ ansible_user_dir }}/.config/zsh/local.zsh"
+        path: "{{ ansible_facts['user_dir'] }}/.config/zsh/local.zsh"
         line: "{{ item }}"
         state: absent
       loop:
