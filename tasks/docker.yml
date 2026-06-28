@@ -1,7 +1,7 @@
 ---
 - name: Check for systemd user session (real hardware only)
   ansible.builtin.stat:
-    path: "/run/user/{{ ansible_user_uid }}"
+    path: "/run/user/{{ ansible_facts['user_uid'] }}"
   register: user_runtime_dir
 
 - name: Setup Docker/dind
