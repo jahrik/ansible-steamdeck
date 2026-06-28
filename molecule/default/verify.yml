@@ -98,7 +98,7 @@
       changed_when: false
 
     - name: Check Konsole profile uses Catppuccin Mocha color scheme
-      ansible.builtin.command: grep -q "ColorScheme=Catppuccin Mocha" ~/.local/share/konsole/Default.profile
+      ansible.builtin.command: grep -q "ColorScheme=catppuccin-mocha" ~/.local/share/konsole/Default.profile
       changed_when: false
 
     - name: Check konsolerc sets default profile
