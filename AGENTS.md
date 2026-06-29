@@ -12,7 +12,9 @@ Top-level meta role that builds a full developer environment on a Steam Deck by 
 |---|---|
 | `tasks/konsole.yml` | Konsole profile + Catppuccin Mocha color scheme + default profile setting |
 | `tasks/tools.yml` | Static-binary CLI tools to `~/.local/bin` (fzf, ripgrep, bat, eza, delta, zoxide, lazygit, fd, gh, direnv, tealdeer/`tldr`, yq, uv+uvx, Go) + tmux config + Catppuccin Mocha theming for bat/delta/fzf/lazygit/btop |
-| `tasks/docker.yml` | Podman socket, docker-cli static binary, dind container, Docker Swarm init, dswarm/mtest/docker shims |
+| `tasks/podman.yml` | Enables the user `podman.socket`; shared prereq for docker/dind and distrobox features |
+| `tasks/docker.yml` | docker-cli static binary, dind container, Docker Swarm init, dswarm/mtest/docker+podman shims |
+| `tasks/distrobox.yml` | Distrobox `dev` container (Arch + `base-devel`), `cc-in-box` shim |
 | `tasks/kde.yml` | KDE Plasma: Catppuccin Mocha color scheme, wallpaper, bottom panel, aurorae window decoration, cursor, Papirus-Dark icons |
 
 Every downloaded tool is pinned to a `<tool>_version` in `defaults/main.yml` and verified against a `<tool>_checksum` (`sha256:...`). Tarball tools `get_url` the archive (with `checksum:`) into `~/.cache/ansible-steamdeck/` then `unarchive` it with `remote_src: true` — `unarchive` itself has no `checksum:` option, so the verification happens on the `get_url` step. Single-binary tools (direnv, tealdeer, yq) `get_url` straight to `~/.local/bin` with `checksum:`. To bump a tool, change its `*_version` and `*_checksum` together (`sha256sum` of the release asset). Each install task has a matching uninstall task gated on `not install`.
@@ -55,6 +57,8 @@ Each role detects `ansible_distribution_release == 'holo'` (from `VERSION_CODENA
 | `dind_image` | `docker:dind` | Docker-in-Podman image |
 | `dind_name` | `dind` | Podman container name |
 | `dind_host` | `tcp://127.0.0.1:2375` | Docker host used by dswarm and docker-cli checks |
+| `distrobox_dev_name` | `dev` | Distrobox container name |
+| `distrobox_dev_image` | `archlinux:latest` | Image used for the dev container (supplies `gcc` via `base-devel`) |
 | `catppuccin_kde_version` | `v0.2.7` | catppuccin/kde release (color schemes + aurorae) |
 | `catppuccin_kde_color_scheme` | `CatppuccinMochaMauve` | Active KDE color scheme |
 | `catppuccin_accent` | `mauve` | Accent reused for lazygit theme + cursor |
@@ -79,13 +83,29 @@ Docker tasks are gated on **both** `ansible_distribution_release == 'holo'` and 
 
 The dind setup runs `docker:dind` under Podman with `--privileged --network=host`. No `--security-opt seccomp=unconfined`. `files/daemon.json` sets `"iptables": false` and `"bridge": "none"` to avoid NAT chain and bridge-network failures inside the Podman container.
 
+Both `docker` and `podman` shims are box-aware via the `CONTAINER_ID` environment variable. When set (distrobox context), both shims forward to the host engine via `distrobox-host-exec` instead of trying to exec a container CLI that is not installed in the box. This matters because exported host wrappers (`gcc`, `make`) run inside the `dev` distrobox — any Makefile that shells out to `docker` or `podman` would otherwise fail. There is one container engine (host podman/dind); both CLIs work identically from the host and from inside the box.
+
 Shims deployed to `~/.local/bin/`:
 
 | Shim | Purpose |
 |---|---|
-| `docker` | Passes all args to `podman` |
+| `docker` | Box-aware: inside distrobox bridges to host via `distrobox-host-exec`; on host, execs `podman` |
+| `podman` | Box-aware: inside distrobox bridges to host via `distrobox-host-exec`; on host, execs `/usr/bin/podman` by absolute path (avoids self-recursion) |
 | `dswarm` | Runs static `docker-cli` against the dind swarm (`DOCKER_HOST=tcp://127.0.0.1:2375`) |
 | `mtest` | Runs `molecule` with Podman socket and venv PATH; clears stale role cache automatically |
+| `cc-in-box` | Routes a command through the distrobox `dev` container in the current host directory |
+
+## Distrobox / dev container Design Notes
+
+SteamOS ships no C compiler and its rootfs is read-only, so CGO and `go test -race` fail on bare metal. The distrobox `dev` container (Arch Linux + `base-devel`) provides `gcc` inside a mutable layer while leaving the host rootfs untouched. Both `podman` and `distrobox` already ship with SteamOS; the only host-state change is enabling `podman.socket` (now in `tasks/podman.yml`, shared with the dind feature).
+
+`cc-in-box` is a thin shim that calls `distrobox enter dev -- <cmd>` with the current working directory mounted, so host paths resolve correctly:
+
+```bash
+cc-in-box go test -race ./...
+```
+
+Distrobox tasks are gated on the same `ansible_distribution_release == 'holo'` + `/run/user/<uid>` conditions as docker tasks and are skipped in the `default` molecule scenario.
 
 ## Usage
 

@@ -17,8 +17,14 @@
 - name: Install extra CLI tools
   ansible.builtin.include_tasks: tools.yml
 
+- name: Enable rootless podman socket
+  ansible.builtin.include_tasks: podman.yml
+
 - name: Setup Docker/dind
   ansible.builtin.include_tasks: docker.yml
+
+- name: Setup distrobox dev container
+  ansible.builtin.include_tasks: distrobox.yml
 
 - name: Configure KDE Plasma
   ansible.builtin.include_tasks: kde.yml

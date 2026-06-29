@@ -1,0 +1,83 @@
+---
+- name: Check for systemd user session (real hardware only)
+  ansible.builtin.stat:
+    path: "/run/user/{{ ansible_facts['user_uid'] }}"
+  register: user_runtime_dir
+
+- name: Setup distrobox dev container
+  when:
+    - install | default(true) | bool
+    - ansible_facts['distribution_release'] == 'holo'
+    - user_runtime_dir.stat.exists
+  block:
+    - name: Check if dev container exists
+      ansible.builtin.command:
+        cmd: "podman container exists {{ distrobox_dev_name }}"
+      register: distrobox_exists
+      changed_when: false
+      failed_when: false
+
+    - name: Create dev distrobox container
+      ansible.builtin.command:
+        cmd: "distrobox create --name {{ distrobox_dev_name }} --image {{ distrobox_dev_image }} --yes"
+      changed_when: true
+      when: distrobox_exists.rc != 0
+
+    - name: Install base-devel toolchain in dev container
+      ansible.builtin.command:
+        cmd: "distrobox enter {{ distrobox_dev_name }} -- sudo pacman -S --needed --noconfirm base-devel"
+      changed_when: false
+
+    - name: Deploy cc-in-box wrapper
+      ansible.builtin.template:
+        src: cc-in-box.j2
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin/cc-in-box"
+        mode: "0755"
+
+    - name: Check exported host binaries exist
+      ansible.builtin.stat:
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/{{ item }}"
+      register: exported_bins
+      loop:
+        - gcc
+        - make
+
+    - name: Export compiler binaries to host
+      ansible.builtin.command:
+        cmd: >-
+          distrobox enter {{ distrobox_dev_name }} --
+          distrobox-export --bin /usr/bin/{{ item.item }}
+          --export-path {{ ansible_facts['user_dir'] }}/.local/bin
+      changed_when: true
+      when: not item.stat.exists
+      loop: "{{ exported_bins.results }}"
+
+- name: Teardown distrobox dev container
+  when:
+    - not (install | default(true) | bool)
+    - ansible_facts['distribution_release'] == 'holo'
+  block:
+    - name: Stop dev container
+      ansible.builtin.command:
+        cmd: "distrobox stop --yes {{ distrobox_dev_name }}"
+      changed_when: true
+      failed_when: false
+
+    - name: Remove dev container
+      ansible.builtin.command:
+        cmd: "distrobox rm --force {{ distrobox_dev_name }}"
+      changed_when: true
+      failed_when: false
+
+    - name: Remove cc-in-box wrapper
+      ansible.builtin.file:
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/cc-in-box"
+        state: absent
+
+    - name: Remove exported host binaries
+      ansible.builtin.file:
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/{{ item }}"
+        state: absent
+      loop:
+        - gcc
+        - make

@@ -12,5 +12,8 @@
     - name: Verify Docker/dind
       ansible.builtin.import_tasks: verify/docker.yml
 
+    - name: Verify distrobox dev container
+      ansible.builtin.import_tasks: verify/distrobox.yml
+
     - name: Verify KDE Plasma
       ansible.builtin.import_tasks: verify/kde.yml

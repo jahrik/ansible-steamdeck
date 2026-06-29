@@ -1,0 +1,18 @@
+---
+- name: Check for systemd user session (real hardware only)
+  ansible.builtin.stat:
+    path: "/run/user/{{ ansible_facts['user_uid'] }}"
+  register: user_runtime_dir
+
+- name: Enable rootless podman socket
+  when:
+    - install | default(true) | bool
+    - ansible_facts['distribution_release'] == 'holo'
+    - user_runtime_dir.stat.exists
+  block:
+    - name: Enable podman user socket
+      ansible.builtin.systemd:
+        name: podman.socket
+        scope: user
+        enabled: true
+        state: started
