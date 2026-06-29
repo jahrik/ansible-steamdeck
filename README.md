@@ -7,7 +7,7 @@ Configures a Steam Deck developer environment with a consistent Catppuccin Mocha
 
 - **Terminal & Konsole** — Catppuccin Mocha Konsole profile, font size 18, unlimited scrollback.
 - **CLI tools** — fzf, ripgrep, bat, eza, delta, zoxide, lazygit, fd, gh, direnv, tealdeer (`tldr`), yq (jq/btop/tmux come from SteamOS). Catppuccin Mocha theming for bat, delta, fzf, lazygit, and btop.
-- **Languages & containers** — uv, Go, and a Podman + dind Docker/Swarm testing stack (`dswarm`/`mtest`/`docker` shims).
+- **Languages & containers** — uv, Go, a Podman + dind Docker/Swarm testing stack (`dswarm`/`mtest`/`docker`+`podman` shims — box-aware, work from host and inside the `dev` container), and a distrobox `dev` container supplying `gcc` for CGO / `go test -race` (`cc-in-box` wrapper).
 - **KDE Plasma** — Catppuccin Mocha (Mauve) color scheme, dark wallpaper, bottom panel, Catppuccin window decorations + cursor, and Papirus-Dark icons. (KDE tasks run only on real hardware.)
 
 Everything works within SteamOS's read-only rootfs: binaries to `~/.local/bin`, configs to `~/.config`, themes to `~/.local/share`. No `pacman`, no sudo.
@@ -20,6 +20,7 @@ Everything works within SteamOS's read-only rootfs: binaries to `~/.local/bin`, 
   * [General](#general)
   * [Konsole](#konsole)
   * [Docker / dind](#docker--dind)
+  * [Distrobox / dev container](#distrobox--dev-container)
   * [KDE Plasma](#kde-plasma)
 * [Dependencies](#dependencies)
 * [Example Playbook](#example-playbook)
@@ -87,6 +88,21 @@ The handiest knobs are below. See [`defaults/main.yml`](defaults/main.yml) for t
 |---|---|---|
 | `docker_cli_version` | `29.5.3` | docker-cli static binary version |
 | `dind_host` | `tcp://127.0.0.1:2375` | Docker host URL used by dswarm/docker-cli |
+
+`~/.local/bin/docker` and `~/.local/bin/podman` are box-aware shims: inside the `dev` distrobox (detected via `CONTAINER_ID`) both forward to the host engine via `distrobox-host-exec`. On the host they behave normally — `docker` execs `podman`, `podman` execs `/usr/bin/podman` by absolute path. One engine (host podman/dind) serves both contexts.
+
+### Distrobox / dev container
+
+| Variable | Default | Description |
+|---|---|---|
+| `distrobox_dev_name` | `dev` | Distrobox container name |
+| `distrobox_dev_image` | `archlinux:latest` | Image used for the dev container (supplies `gcc` via `base-devel`) |
+
+`cc-in-box` (`~/.local/bin/cc-in-box`) routes a command through the container, mounting the current host directory:
+
+```bash
+cc-in-box go test -race ./...
+```
 
 ### KDE Plasma
 

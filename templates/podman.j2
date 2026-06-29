@@ -3,4 +3,4 @@
 if [ -n "${CONTAINER_ID}" ]; then
   exec distrobox-host-exec podman "$@"
 fi
-exec podman "$@"
+exec /usr/bin/podman "$@"

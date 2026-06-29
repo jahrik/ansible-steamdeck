@@ -1,0 +1,37 @@
+---
+- name: Check cc-in-box wrapper exists
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['user_dir'] }}/.local/bin/cc-in-box"
+  register: cc_in_box_bin
+
+- name: Assert cc-in-box is installed
+  ansible.builtin.assert:
+    that: cc_in_box_bin.stat.exists
+
+- name: Check gcc version inside dev container
+  ansible.builtin.command: "distrobox enter {{ distrobox_dev_name }} -- gcc --version"
+  register: gcc_version
+  changed_when: false
+
+- name: Assert gcc is available in dev container
+  ansible.builtin.assert:
+    that: gcc_version.rc == 0
+    fail_msg: "gcc not available in {{ distrobox_dev_name }} container"
+
+- name: Check exported host wrappers exist
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['user_dir'] }}/.local/bin/{{ item }}"
+  register: exported_host_bins
+  loop:
+    - gcc
+    - make
+
+- name: Assert exported host wrappers exist and are executable
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.executable
+    fail_msg: "{{ item.item }} host wrapper missing or not executable"
+  loop: "{{ exported_host_bins.results }}"
+  loop_control:
+    label: "{{ item.item }}"

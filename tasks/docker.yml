@@ -10,13 +10,6 @@
     - ansible_facts['distribution_release'] == 'holo'
     - user_runtime_dir.stat.exists
   block:
-    - name: Enable podman user socket
-      ansible.builtin.systemd:
-        name: podman.socket
-        scope: user
-        enabled: true
-        state: started
-
     - name: Ensure ~/.config/dind directory exists
       ansible.builtin.file:
         path: "{{ ansible_facts['user_dir'] }}/.config/dind"
@@ -62,6 +55,12 @@
       ansible.builtin.template:
         src: docker.j2
         dest: "{{ ansible_facts['user_dir'] }}/.local/bin/docker"
+        mode: '0755'
+
+    - name: Deploy podman shim
+      ansible.builtin.template:
+        src: podman.j2
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin/podman"
         mode: '0755'
 
     - name: Deploy dswarm wrapper
@@ -162,6 +161,11 @@
     - name: Remove docker shim
       ansible.builtin.file:
         path: "{{ ansible_facts['user_dir'] }}/.local/bin/docker"
+        state: absent
+
+    - name: Remove podman shim
+      ansible.builtin.file:
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/podman"
         state: absent
 
     - name: Remove dswarm wrapper

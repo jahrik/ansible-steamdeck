@@ -1,0 +1,6 @@
+#!/bin/bash
+# {{ ansible_managed }}
+# Run a command inside the {{ distrobox_dev_name }} distrobox dev container
+# from the current host directory. Supplies gcc (base-devel) for CGO / go test -race.
+# Usage: cc-in-box go test -race ./...
+exec distrobox enter {{ distrobox_dev_name }} -- bash -lc "cd \"$PWD\" && exec \"\$@\"" _ "$@"
