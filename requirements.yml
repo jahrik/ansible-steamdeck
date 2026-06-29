@@ -1,6 +1,5 @@
 ---
 roles:
   - name: jahrik.nerd_fonts
-  - name: jahrik.alacritty
   - name: jahrik.nvim
   - name: jahrik.zsh

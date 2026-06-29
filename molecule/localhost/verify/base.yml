@@ -4,7 +4,6 @@
     path: "{{ ansible_facts['user_dir'] }}/.local/bin/{{ item }}"
   register: base_bins
   loop:
-    - alacritty
     - zsh
     - nvim
 
