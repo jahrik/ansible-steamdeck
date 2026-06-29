@@ -24,7 +24,6 @@ Every downloaded tool is pinned to a `<tool>_version` in `defaults/main.yml` and
 | Role | Purpose |
 |---|---|
 | `jahrik.nerd_fonts` | Nerd Fonts (DejaVuSansMono, JetBrainsMono) |
-| `jahrik.alacritty` | Terminal emulator + config |
 | `jahrik.zsh` | Shell + Oh My Zsh + Powerlevel10k |
 | `jahrik.nvim` | Neovim + Lazy + LSP |
 

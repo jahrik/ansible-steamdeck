@@ -13,26 +13,6 @@
         that: nerd_font.stat.exists
         fail_msg: "~/.local/share/fonts/DejaVuSansMNerdFontMono-Regular.ttf not found"
 
-    - name: Stat ~/.local/bin/alacritty
-      ansible.builtin.stat:
-        path: ~/.local/bin/alacritty
-      register: alacritty_bin
-
-    - name: Assert alacritty binary exists
-      ansible.builtin.assert:
-        that: alacritty_bin.stat.exists
-        fail_msg: "~/.local/bin/alacritty not found"
-
-    - name: Stat ~/.config/alacritty/alacritty.toml
-      ansible.builtin.stat:
-        path: ~/.config/alacritty/alacritty.toml
-      register: alacritty_cfg
-
-    - name: Assert alacritty config exists
-      ansible.builtin.assert:
-        that: alacritty_cfg.stat.exists
-        fail_msg: "~/.config/alacritty/alacritty.toml not found"
-
     - name: Stat ~/.local/bin/zsh
       ansible.builtin.stat:
         path: ~/.local/bin/zsh
