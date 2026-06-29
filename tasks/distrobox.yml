@@ -74,10 +74,21 @@
         path: "{{ ansible_facts['user_dir'] }}/.local/bin/cc-in-box"
         state: absent
 
-    - name: Remove exported host binaries
-      ansible.builtin.file:
-        path: "{{ ansible_facts['user_dir'] }}/.local/bin/{{ item }}"
-        state: absent
+    - name: Check whether exported host binaries are distrobox-managed
+      ansible.builtin.command:
+        cmd: "grep -ql distrobox_binary {{ ansible_facts['user_dir'] }}/.local/bin/{{ item }}"
       loop:
         - gcc
         - make
+      register: distrobox_managed_bins
+      changed_when: false
+      failed_when: false
+
+    - name: Remove distrobox-exported host binaries
+      ansible.builtin.file:
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/{{ item.item }}"
+        state: absent
+      loop: "{{ distrobox_managed_bins.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+      when: item.rc == 0

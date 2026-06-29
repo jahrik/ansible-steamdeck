@@ -17,3 +17,21 @@
   ansible.builtin.assert:
     that: gcc_version.rc == 0
     fail_msg: "gcc not available in {{ distrobox_dev_name }} container"
+
+- name: Check exported host wrappers exist
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['user_dir'] }}/.local/bin/{{ item }}"
+  register: exported_host_bins
+  loop:
+    - gcc
+    - make
+
+- name: Assert exported host wrappers exist and are executable
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.executable
+    fail_msg: "{{ item.item }} host wrapper missing or not executable"
+  loop: "{{ exported_host_bins.results }}"
+  loop_control:
+    label: "{{ item.item }}"
