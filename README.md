@@ -23,6 +23,7 @@ Everything works within SteamOS's read-only rootfs: binaries to `~/.local/bin`, 
   * [Distrobox / dev container](#distrobox--dev-container)
   * [KDE Plasma](#kde-plasma)
 * [Dependencies](#dependencies)
+* [Tags](#tags)
 * [Example Playbook](#example-playbook)
 * [License](#license)
 * [Notes](#notes)
@@ -119,6 +120,27 @@ cc-in-box go test -race ./...
 | jahrik.nerd_fonts | [![CI](https://github.com/jahrik/ansible-nerd-fonts/actions/workflows/cicd.yml/badge.svg)](https://github.com/jahrik/ansible-nerd-fonts/actions/workflows/cicd.yml) |
 | jahrik.zsh | [![CI](https://github.com/jahrik/ansible-zsh/actions/workflows/cicd.yml/badge.svg)](https://github.com/jahrik/ansible-zsh/actions/workflows/cicd.yml) |
 | jahrik.nvim | [![CI](https://github.com/jahrik/ansible-nvim/actions/workflows/cicd.yml/badge.svg)](https://github.com/jahrik/ansible-nvim/actions/workflows/cicd.yml) |
+
+## Tags
+
+Run or skip parts of the role with tags:
+
+```bash
+ansible-playbook playbook.yml --tags steamdeck:kde
+ansible-playbook playbook.yml --skip-tags steamdeck:docker,steamdeck:distrobox
+```
+
+| Tag | Scope |
+|---|---|
+| `steamdeck` | All role tasks |
+| `steamdeck:zsh` | zsh (via `jahrik.zsh`) |
+| `steamdeck:nvim` | nvim, lazy, LSP (via `jahrik.nvim`) |
+| `steamdeck:konsole` | Konsole profile + color scheme |
+| `steamdeck:tools` | CLI tools (`tasks/tools.yml`) |
+| `steamdeck:podman` | Rootless podman socket |
+| `steamdeck:docker` | Docker/dind stack |
+| `steamdeck:distrobox` | Distrobox `dev` container |
+| `steamdeck:kde` | KDE Plasma theming |
 
 ## Example Playbook
 

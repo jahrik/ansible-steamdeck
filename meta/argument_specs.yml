@@ -1,0 +1,226 @@
+---
+argument_specs:
+  main:
+    short_description: Configure a Steam Deck developer environment
+    options:
+      install:
+        type: bool
+        default: true
+        description: Set to false to uninstall everything this role manages
+      editor:
+        type: str
+        default: nvim
+        description: Default $EDITOR written to the zsh export config
+      lang:
+        type: str
+        default: en_US.UTF-8
+        description: Locale / $LANG written to the zsh export config
+      go_version:
+        type: str
+        default: "1.26.4"
+        description: Go toolchain version (tarball from dl.google.com)
+      go_checksum:
+        type: str
+        description: sha256 checksum of the Go tarball
+      fzf_version:
+        type: str
+        default: "0.73.1"
+        description: fzf release version
+      fzf_checksum:
+        type: str
+        description: sha256 checksum of the fzf release asset
+      ripgrep_version:
+        type: str
+        default: "15.1.0"
+        description: ripgrep release version
+      ripgrep_checksum:
+        type: str
+        description: sha256 checksum of the ripgrep release asset
+      fd_version:
+        type: str
+        default: "10.4.2"
+        description: fd release version
+      fd_checksum:
+        type: str
+        description: sha256 checksum of the fd release asset
+      bat_version:
+        type: str
+        default: "0.26.1"
+        description: bat release version
+      bat_checksum:
+        type: str
+        description: sha256 checksum of the bat release asset
+      eza_version:
+        type: str
+        default: "0.23.4"
+        description: eza release version
+      eza_checksum:
+        type: str
+        description: sha256 checksum of the eza release asset
+      zoxide_version:
+        type: str
+        default: "0.9.9"
+        description: zoxide release version
+      zoxide_checksum:
+        type: str
+        description: sha256 checksum of the zoxide release asset
+      direnv_version:
+        type: str
+        default: "2.37.1"
+        description: direnv release version
+      direnv_checksum:
+        type: str
+        description: sha256 checksum of the direnv binary
+      tealdeer_version:
+        type: str
+        default: "1.8.1"
+        description: tealdeer (tldr) release version
+      tealdeer_checksum:
+        type: str
+        description: sha256 checksum of the tealdeer binary
+      yq_version:
+        type: str
+        default: "4.53.3"
+        description: yq release version
+      yq_checksum:
+        type: str
+        description: sha256 checksum of the yq binary
+      delta_version:
+        type: str
+        default: "0.19.2"
+        description: delta release version
+      delta_checksum:
+        type: str
+        description: sha256 checksum of the delta release asset
+      lazygit_version:
+        type: str
+        default: "0.62.2"
+        description: lazygit release version
+      lazygit_checksum:
+        type: str
+        description: sha256 checksum of the lazygit release asset
+      gh_version:
+        type: str
+        default: "2.95.0"
+        description: GitHub CLI release version
+      gh_checksum:
+        type: str
+        description: sha256 checksum of the gh release asset
+      uv_version:
+        type: str
+        default: "0.11.23"
+        description: uv release version
+      uv_checksum:
+        type: str
+        description: sha256 checksum of the uv release asset
+      catppuccin_kde_version:
+        type: str
+        default: v0.2.7
+        description: catppuccin/kde release (color schemes + aurorae)
+      catppuccin_kde_color_scheme:
+        type: str
+        default: CatppuccinMochaMauve
+        description: Active KDE color scheme
+      catppuccin_accent:
+        type: str
+        default: mauve
+        description: Accent reused for lazygit theme + cursor theme
+      catppuccin_wallpaper_url:
+        type: str
+        default: "https://raw.githubusercontent.com/orangci/walls-catppuccin-mocha/master/dark-forest.jpg"
+        description: Wallpaper download URL
+      catppuccin_aurorae_theme:
+        type: str
+        default: CatppuccinMocha-Modern
+        description: Aurorae window decoration theme
+      catppuccin_cursors_version:
+        type: str
+        default: v2.0.0
+        description: catppuccin/cursors release
+      papirus_version:
+        type: str
+        default: "20250501"
+        description: Papirus icon theme release tag
+      docker_cli_version:
+        type: str
+        default: "29.5.3"
+        description: docker-cli static binary version
+      dind_image:
+        type: str
+        default: docker:dind
+        description: Docker-in-Podman image
+      dind_name:
+        type: str
+        default: dind
+        description: Podman container name for dind
+      dind_host:
+        type: str
+        default: tcp://127.0.0.1:2375
+        description: Docker host used by dswarm and docker-cli checks (loopback only)
+      distrobox_dev_name:
+        type: str
+        default: dev
+        description: Distrobox container name
+      distrobox_dev_image:
+        type: str
+        default: archlinux:latest
+        description: Image used for the dev container (supplies gcc via base-devel)
+      konsole_profile_name:
+        type: str
+        default: Default
+        description: Konsole profile filename (without .profile)
+      konsole_shell:
+        type: str
+        description: Shell command set in the Konsole profile
+      konsole_color_scheme:
+        type: str
+        default: catppuccin-mocha
+        description: Color scheme filename base (without .colorscheme)
+      konsole_font:
+        type: str
+        default: DejaVu Sans Mono
+        description: Font family
+      konsole_font_size:
+        type: int
+        default: 18
+        description: Font size in points
+      konsole_line_spacing:
+        type: int
+        default: 0
+        description: Extra pixels between lines
+      konsole_terminal_margin:
+        type: int
+        default: 1
+        description: Padding in pixels between border and content
+      konsole_cursor_shape:
+        type: int
+        default: 0
+        description: "Cursor shape: 0=block, 1=I-beam, 2=underline"
+      konsole_blinking_cursor:
+        type: bool
+        default: false
+        description: Enable cursor blinking
+      konsole_history_mode:
+        type: int
+        default: 2
+        description: "Scrollback mode: 1=fixed size, 2=unlimited"
+      konsole_history_size:
+        type: int
+        default: 0
+        description: Scrollback line count (unused when history_mode=2)
+      konsole_scroll_bar_position:
+        type: int
+        default: 2
+        description: "Scrollbar: 0=left, 1=right, 2=hidden"
+      konsole_highlight_scrolled_lines:
+        type: bool
+        default: true
+        description: Briefly highlight lines scrolled into view
+      konsole_auto_copy_selected_text:
+        type: bool
+        default: false
+        description: Copy selection to clipboard automatically (X11 style)
+      konsole_underline_links:
+        type: bool
+        default: true
+        description: Underline URLs on hover

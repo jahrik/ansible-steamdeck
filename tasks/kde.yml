@@ -5,6 +5,7 @@
   register: kde_tooling
   changed_when: false
   failed_when: false
+  check_mode: false
 
 - name: Configure KDE Plasma
   when:
@@ -32,6 +33,8 @@
         cmd: kreadconfig6 --file {{ ansible_facts['user_dir'] }}/.config/kdeglobals --group General --key ColorScheme
       register: kde_color_scheme
       changed_when: false
+      failed_when: false
+      check_mode: false
 
     - name: Apply Catppuccin Mocha color scheme
       ansible.builtin.command:
@@ -66,6 +69,7 @@
       register: current_wallpaper
       changed_when: false
       failed_when: false
+      check_mode: false
 
     - name: Apply wallpaper
       ansible.builtin.command:
@@ -96,6 +100,8 @@
           --key location
       register: panel_location
       changed_when: false
+      failed_when: false
+      check_mode: false
       when: panel_id != ''
 
     - name: Move panel to bottom
@@ -131,6 +137,7 @@
       register: kwin_deco
       changed_when: false
       failed_when: false
+      check_mode: false
 
     - name: Set Catppuccin window decoration
       ansible.builtin.command:
@@ -166,6 +173,7 @@
       register: cursor_theme
       changed_when: false
       failed_when: false
+      check_mode: false
 
     - name: Apply Catppuccin cursor theme
       ansible.builtin.command:
@@ -196,6 +204,7 @@
       register: icon_theme
       changed_when: false
       failed_when: false
+      check_mode: false
 
     - name: Set Papirus-Dark as icon theme
       ansible.builtin.command:
