@@ -33,6 +33,7 @@
         cmd: kreadconfig6 --file {{ ansible_facts['user_dir'] }}/.config/kdeglobals --group General --key ColorScheme
       register: kde_color_scheme
       changed_when: false
+      failed_when: false
       check_mode: false
 
     - name: Apply Catppuccin Mocha color scheme
@@ -99,6 +100,7 @@
           --key location
       register: panel_location
       changed_when: false
+      failed_when: false
       check_mode: false
       when: panel_id != ''
 
