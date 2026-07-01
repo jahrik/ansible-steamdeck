@@ -2,25 +2,87 @@
 - name: Install and configure zsh
   ansible.builtin.include_role:
     name: jahrik.zsh
+    apply:
+      tags:
+        - steamdeck
+        - steamdeck:zsh
+  tags:
+    - steamdeck
+    - steamdeck:zsh
 
 - name: Install nvim, lazy, lsp, and plugins
   ansible.builtin.include_role:
     name: jahrik.nvim
+    apply:
+      tags:
+        - steamdeck
+        - steamdeck:nvim
+  tags:
+    - steamdeck
+    - steamdeck:nvim
 
 - name: Configure Konsole
-  ansible.builtin.include_tasks: konsole.yml
+  ansible.builtin.include_tasks:
+    file: konsole.yml
+    apply:
+      tags:
+        - steamdeck
+        - steamdeck:konsole
+  tags:
+    - steamdeck
+    - steamdeck:konsole
 
 - name: Install extra CLI tools
-  ansible.builtin.include_tasks: tools.yml
+  ansible.builtin.include_tasks:
+    file: tools.yml
+    apply:
+      tags:
+        - steamdeck
+        - steamdeck:tools
+  tags:
+    - steamdeck
+    - steamdeck:tools
 
 - name: Enable rootless podman socket
-  ansible.builtin.include_tasks: podman.yml
+  ansible.builtin.include_tasks:
+    file: podman.yml
+    apply:
+      tags:
+        - steamdeck
+        - steamdeck:podman
+  tags:
+    - steamdeck
+    - steamdeck:podman
 
 - name: Setup Docker/dind
-  ansible.builtin.include_tasks: docker.yml
+  ansible.builtin.include_tasks:
+    file: docker.yml
+    apply:
+      tags:
+        - steamdeck
+        - steamdeck:docker
+  tags:
+    - steamdeck
+    - steamdeck:docker
 
 - name: Setup distrobox dev container
-  ansible.builtin.include_tasks: distrobox.yml
+  ansible.builtin.include_tasks:
+    file: distrobox.yml
+    apply:
+      tags:
+        - steamdeck
+        - steamdeck:distrobox
+  tags:
+    - steamdeck
+    - steamdeck:distrobox
 
 - name: Configure KDE Plasma
-  ansible.builtin.include_tasks: kde.yml
+  ansible.builtin.include_tasks:
+    file: kde.yml
+    apply:
+      tags:
+        - steamdeck
+        - steamdeck:kde
+  tags:
+    - steamdeck
+    - steamdeck:kde
