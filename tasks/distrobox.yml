@@ -16,6 +16,7 @@
       register: distrobox_exists
       changed_when: false
       failed_when: false
+      check_mode: false
 
     - name: Create dev distrobox container
       ansible.builtin.command:
@@ -83,6 +84,7 @@
       register: distrobox_managed_bins
       changed_when: false
       failed_when: false
+      check_mode: false
 
     - name: Remove distrobox-exported host binaries
       ansible.builtin.file:

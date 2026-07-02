@@ -61,6 +61,8 @@ papirus_version: "20250501"
 docker_cli_version: "29.5.3"
 dind_image: docker:dind
 dind_name: dind
+# Loopback-only; dind is bound to the host's local Docker socket port, never
+# exposed off-box. Override only if dind_name/network topology changes.
 dind_host: tcp://127.0.0.1:2375
 
 # distrobox dev container (C toolchain for CGO / go test -race)

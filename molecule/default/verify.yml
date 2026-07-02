@@ -84,3 +84,64 @@
     - name: Check konsolerc sets default profile
       ansible.builtin.command: grep -q "DefaultProfile.*Default.profile" ~/.config/konsolerc
       changed_when: false
+
+- name: Verify uninstall
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Run jahrik.steamdeck with install false
+      ansible.builtin.include_role:
+        name: jahrik.steamdeck
+      vars:
+        install: false
+
+    - name: Stat ~/.local/share/konsole/Default.profile
+      ansible.builtin.stat:
+        path: ~/.local/share/konsole/Default.profile
+      register: konsole_profile_removed
+
+    - name: Assert Konsole profile is removed
+      ansible.builtin.assert:
+        that: not konsole_profile_removed.stat.exists
+        fail_msg: "~/.local/share/konsole/Default.profile still present after uninstall"
+
+    - name: Stat ~/.local/share/konsole/catppuccin-mocha.colorscheme
+      ansible.builtin.stat:
+        path: ~/.local/share/konsole/catppuccin-mocha.colorscheme
+      register: catppuccin_colorscheme_removed
+
+    - name: Assert Catppuccin Mocha color scheme is removed
+      ansible.builtin.assert:
+        that: not catppuccin_colorscheme_removed.stat.exists
+        fail_msg: "~/.local/share/konsole/catppuccin-mocha.colorscheme still present after uninstall"
+
+    - name: Check konsolerc no longer sets a default profile
+      ansible.builtin.command: grep -q "DefaultProfile.*Default.profile" ~/.config/konsolerc
+      register: konsolerc_default_profile
+      changed_when: false
+      failed_when: false
+
+    - name: Assert konsolerc default profile setting is removed
+      ansible.builtin.assert:
+        that: konsolerc_default_profile.rc != 0
+        fail_msg: "~/.config/konsolerc still sets DefaultProfile after uninstall"
+
+    - name: Stat ~/.local/bin/fzf
+      ansible.builtin.stat:
+        path: ~/.local/bin/fzf
+      register: fzf_bin_removed
+
+    - name: Assert fzf binary is removed
+      ansible.builtin.assert:
+        that: not fzf_bin_removed.stat.exists
+        fail_msg: "~/.local/bin/fzf still present after uninstall"
+
+    - name: Stat ~/.local/bin/bat
+      ansible.builtin.stat:
+        path: ~/.local/bin/bat
+      register: bat_bin_removed
+
+    - name: Assert bat binary is removed
+      ansible.builtin.assert:
+        that: not bat_bin_removed.stat.exists
+        fail_msg: "~/.local/bin/bat still present after uninstall"

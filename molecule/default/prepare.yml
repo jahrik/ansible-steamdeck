@@ -16,7 +16,6 @@
           - curl
           - fontconfig
           - unzip
-        state: present
 
     - name: Remove /etc/arch-release to allow SteamOS detection
       become: true
