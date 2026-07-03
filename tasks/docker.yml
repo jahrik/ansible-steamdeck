@@ -135,7 +135,9 @@
 
     - name: Initialize Docker Swarm
       ansible.builtin.command:
-        cmd: "{{ ansible_facts['user_dir'] }}/.local/bin/docker-cli --host {{ dind_host }} swarm init"
+        cmd: >
+          {{ ansible_facts['user_dir'] }}/.local/bin/docker-cli --host {{ dind_host }}
+          swarm init --advertise-addr {{ ansible_facts['default_ipv4']['address'] }}
       changed_when: true
       when: swarm_state.stdout != 'active'
 
