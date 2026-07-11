@@ -24,9 +24,11 @@
       changed_when: true
       when: pianobar_box_exists.rc != 0
 
-    - name: Install pianobar in container
+# pass supplies password_command for ~/.config/pianobar/config; it must live in
+    # the container because pianobar (and thus password_command) runs there.
+    - name: Install pianobar and pass in container
       ansible.builtin.command:
-        cmd: "distrobox enter {{ pianobar_box_name }} -- sudo pacman -S --needed --noconfirm pianobar"
+        cmd: "distrobox enter {{ pianobar_box_name }} -- sudo pacman -S --needed --noconfirm pianobar pass"
       changed_when: false
 
     - name: Check libao default driver in container

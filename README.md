@@ -118,6 +118,14 @@ pianobar has no upstream binary releases and SteamOS ships no compiler, so it in
 
 The role does **not** manage `~/.config/pianobar/config` — it holds your Pandora credentials. Create it yourself; distrobox shares `$HOME`, so the host-side config is picked up inside the container.
 
+The container also ships [`pass`](https://www.passwordstore.org/), so instead of a plaintext password you can set `password_command = pass show pandora` (pianobar runs inside the container, so the command must be available there; the GPG keyring and password store live in the shared `$HOME`):
+
+```bash
+gpg --quick-gen-key "you@example.com"
+distrobox enter pianobar -- pass init you@example.com
+distrobox enter pianobar -- pass insert pandora
+```
+
 ### KDE Plasma
 
 | Variable | Default | Description |
