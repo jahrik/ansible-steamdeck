@@ -69,6 +69,10 @@ dind_host: tcp://127.0.0.1:2375
 distrobox_dev_name: dev
 distrobox_dev_image: archlinux:latest
 
+# pianobar (Pandora client) distrobox container
+pianobar_box_name: pianobar
+pianobar_box_image: archlinux:latest
+
 konsole_profile_name: Default
 konsole_shell: "{{ ansible_facts['user_dir'] }}/.local/bin/zsh"
 # Must match the .colorscheme filename base (catppuccin-mocha.colorscheme),

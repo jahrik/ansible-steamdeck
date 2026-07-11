@@ -1,0 +1,95 @@
+---
+- name: Check for systemd user session (real hardware only)
+  ansible.builtin.stat:
+    path: "/run/user/{{ ansible_facts['user_uid'] }}"
+  register: user_runtime_dir
+
+- name: Setup pianobar distrobox container
+  when:
+    - install | default(true) | bool
+    - ansible_facts['distribution_release'] == 'holo'
+    - user_runtime_dir.stat.exists
+  block:
+    - name: Check if pianobar container exists
+      ansible.builtin.command:
+        cmd: "podman container exists {{ pianobar_box_name }}"
+      register: pianobar_box_exists
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: Create pianobar distrobox container
+      ansible.builtin.command:
+        cmd: "distrobox create --name {{ pianobar_box_name }} --image {{ pianobar_box_image }} --yes"
+      changed_when: true
+      when: pianobar_box_exists.rc != 0
+
+# pass supplies password_command for ~/.config/pianobar/config; it must live in
+    # the container because pianobar (and thus password_command) runs there.
+    - name: Install pianobar and pass in container
+      ansible.builtin.command:
+        cmd: "distrobox enter {{ pianobar_box_name }} -- sudo pacman -S --needed --noconfirm pianobar pass"
+      changed_when: false
+
+    - name: Check libao default driver in container
+      ansible.builtin.command:
+        cmd: "distrobox enter {{ pianobar_box_name }} -- grep -q '^default_driver=pulse' /etc/libao.conf"
+      register: libao_driver
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    # Arch defaults libao to ALSA, which cannot reach the sound hardware from
+    # inside the container; the host Pulse/PipeWire socket is shared, so pulse works.
+    - name: Configure libao to use PulseAudio in container
+      ansible.builtin.command:
+        cmd: >-
+          distrobox enter {{ pianobar_box_name }} --
+          sudo sh -c 'printf "default_driver=pulse\n" > /etc/libao.conf'
+      changed_when: true
+      when: libao_driver.rc != 0
+
+    - name: Check exported pianobar binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/pianobar"
+      register: pianobar_bin
+
+    - name: Export pianobar binary to host
+      ansible.builtin.command:
+        cmd: >-
+          distrobox enter {{ pianobar_box_name }} --
+          distrobox-export --bin /usr/bin/pianobar
+          --export-path {{ ansible_facts['user_dir'] }}/.local/bin
+      changed_when: true
+      when: not pianobar_bin.stat.exists
+
+- name: Teardown pianobar distrobox container
+  when:
+    - not (install | default(true) | bool)
+    - ansible_facts['distribution_release'] == 'holo'
+  block:
+    - name: Stop pianobar container
+      ansible.builtin.command:
+        cmd: "distrobox stop --yes {{ pianobar_box_name }}"
+      changed_when: true
+      failed_when: false
+
+    - name: Remove pianobar container
+      ansible.builtin.command:
+        cmd: "distrobox rm --force {{ pianobar_box_name }}"
+      changed_when: true
+      failed_when: false
+
+    - name: Check whether exported pianobar binary is distrobox-managed
+      ansible.builtin.command:
+        cmd: "grep -ql distrobox_binary {{ ansible_facts['user_dir'] }}/.local/bin/pianobar"
+      register: pianobar_managed_bin
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: Remove distrobox-exported pianobar binary
+      ansible.builtin.file:
+        path: "{{ ansible_facts['user_dir'] }}/.local/bin/pianobar"
+        state: absent
+      when: pianobar_managed_bin.rc == 0

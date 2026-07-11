@@ -1,0 +1,22 @@
+---
+- name: Check pianobar package inside pianobar container
+  ansible.builtin.command: "distrobox enter {{ pianobar_box_name }} -- pacman -Q pianobar"
+  register: pianobar_pkg
+  changed_when: false
+
+- name: Assert pianobar is installed in pianobar container
+  ansible.builtin.assert:
+    that: pianobar_pkg.rc == 0
+    fail_msg: "pianobar not installed in {{ pianobar_box_name }} container"
+
+- name: Check exported pianobar wrapper exists
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['user_dir'] }}/.local/bin/pianobar"
+  register: pianobar_host_bin
+
+- name: Assert exported pianobar wrapper exists and is executable
+  ansible.builtin.assert:
+    that:
+      - pianobar_host_bin.stat.exists
+      - pianobar_host_bin.stat.executable
+    fail_msg: "pianobar host wrapper missing or not executable"

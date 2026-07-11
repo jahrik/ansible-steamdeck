@@ -76,6 +76,17 @@
     - steamdeck
     - steamdeck:distrobox
 
+- name: Setup pianobar container
+  ansible.builtin.include_tasks:
+    file: pianobar.yml
+    apply:
+      tags:
+        - steamdeck
+        - steamdeck:pianobar
+  tags:
+    - steamdeck
+    - steamdeck:pianobar
+
 - name: Configure KDE Plasma
   ansible.builtin.include_tasks:
     file: kde.yml

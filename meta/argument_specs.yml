@@ -165,6 +165,14 @@ argument_specs:
         type: str
         default: archlinux:latest
         description: Image used for the dev container (supplies gcc via base-devel)
+      pianobar_box_name:
+        type: str
+        default: pianobar
+        description: Distrobox container name for pianobar
+      pianobar_box_image:
+        type: str
+        default: archlinux:latest
+        description: Image used for the pianobar container
       konsole_profile_name:
         type: str
         default: Default
