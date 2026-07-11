@@ -29,6 +29,24 @@
         cmd: "distrobox enter {{ pianobar_box_name }} -- sudo pacman -S --needed --noconfirm pianobar"
       changed_when: false
 
+    - name: Check libao default driver in container
+      ansible.builtin.command:
+        cmd: "distrobox enter {{ pianobar_box_name }} -- grep -q '^default_driver=pulse' /etc/libao.conf"
+      register: libao_driver
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    # Arch defaults libao to ALSA, which cannot reach the sound hardware from
+    # inside the container; the host Pulse/PipeWire socket is shared, so pulse works.
+    - name: Configure libao to use PulseAudio in container
+      ansible.builtin.command:
+        cmd: >-
+          distrobox enter {{ pianobar_box_name }} --
+          sudo sh -c 'printf "default_driver=pulse\n" > /etc/libao.conf'
+      changed_when: true
+      when: libao_driver.rc != 0
+
     - name: Check exported pianobar binary exists
       ansible.builtin.stat:
         path: "{{ ansible_facts['user_dir'] }}/.local/bin/pianobar"

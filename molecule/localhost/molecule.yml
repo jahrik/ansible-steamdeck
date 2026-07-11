@@ -15,6 +15,7 @@ provisioner:
         vars:
           dind_host: tcp://127.0.0.1:2375
           distrobox_dev_name: dev
+          pianobar_box_name: pianobar
         hosts:
           localhost:
             ansible_connection: local
