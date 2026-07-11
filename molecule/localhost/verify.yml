@@ -15,5 +15,8 @@
     - name: Verify distrobox dev container
       ansible.builtin.import_tasks: verify/distrobox.yml
 
+    - name: Verify pianobar container
+      ansible.builtin.import_tasks: verify/pianobar.yml
+
     - name: Verify KDE Plasma
       ansible.builtin.import_tasks: verify/kde.yml

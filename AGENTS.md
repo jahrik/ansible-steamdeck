@@ -15,6 +15,7 @@ Top-level meta role that builds a full developer environment on a Steam Deck by 
 | `tasks/podman.yml` | Enables the user `podman.socket`; shared prereq for docker/dind and distrobox features |
 | `tasks/docker.yml` | docker-cli static binary, dind container, Docker Swarm init, dswarm/mtest/docker+podman shims |
 | `tasks/distrobox.yml` | Distrobox `dev` container (Arch + `base-devel`), `cc-in-box` shim |
+| `tasks/pianobar.yml` | pianobar (Pandora client) in its own distrobox container, `distrobox-export`ed to `~/.local/bin` |
 | `tasks/kde.yml` | KDE Plasma: Catppuccin Mocha color scheme, wallpaper, bottom panel, aurorae window decoration, cursor, Papirus-Dark icons |
 
 Every downloaded tool is pinned to a `<tool>_version` in `defaults/main.yml` and verified against a `<tool>_checksum` (`sha256:...`). Tarball tools `get_url` the archive (with `checksum:`) into `~/.cache/ansible-steamdeck/` then `unarchive` it with `remote_src: true` — `unarchive` itself has no `checksum:` option, so the verification happens on the `get_url` step. Single-binary tools (direnv, tealdeer, yq) `get_url` straight to `~/.local/bin` with `checksum:`. To bump a tool, change its `*_version` and `*_checksum` together (`sha256sum` of the release asset). Each install task has a matching uninstall task gated on `not install`.
@@ -58,6 +59,8 @@ Each role detects `ansible_distribution_release == 'holo'` (from `VERSION_CODENA
 | `dind_host` | `tcp://127.0.0.1:2375` | Docker host used by dswarm and docker-cli checks |
 | `distrobox_dev_name` | `dev` | Distrobox container name |
 | `distrobox_dev_image` | `archlinux:latest` | Image used for the dev container (supplies `gcc` via `base-devel`) |
+| `pianobar_box_name` | `pianobar` | Distrobox container name for pianobar |
+| `pianobar_box_image` | `archlinux:latest` | Image used for the pianobar container |
 | `catppuccin_kde_version` | `v0.2.7` | catppuccin/kde release (color schemes + aurorae) |
 | `catppuccin_kde_color_scheme` | `CatppuccinMochaMauve` | Active KDE color scheme |
 | `catppuccin_accent` | `mauve` | Accent reused for lazygit theme + cursor |
@@ -105,6 +108,12 @@ cc-in-box go test -race ./...
 ```
 
 Distrobox tasks are gated on the same `ansible_distribution_release == 'holo'` + `/run/user/<uid>` conditions as docker tasks and are skipped in the `default` molecule scenario.
+
+## pianobar Design Notes
+
+pianobar (terminal Pandora client) has no upstream binary releases, and SteamOS has no host compiler — a binary built in an Arch container would link against newer libs than the host ships (e.g. ffmpeg soname drift). So `tasks/pianobar.yml` creates a dedicated distrobox container (separate from `dev`, which is for dev tooling only; both default to `archlinux:latest`, so podman shares the image layers), installs `pianobar` from Arch `[extra]` via pacman, and `distrobox-export`s it to `~/.local/bin/pianobar`. Audio works because distrobox shares the host PipeWire/Pulse sockets. Same holo + `/run/user/<uid>` gating as the other container tasks.
+
+The role never touches `~/.config/pianobar/config` (Pandora credentials — never write secrets). The user creates it manually; distrobox shares `$HOME`, so the config is visible inside the container.
 
 ## Usage
 

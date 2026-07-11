@@ -9,6 +9,7 @@ Configures a Steam Deck developer environment with a consistent Catppuccin Mocha
 - **CLI tools** — fzf, ripgrep, bat, eza, delta, zoxide, lazygit, fd, gh, direnv, tealdeer (`tldr`), yq (jq/btop/tmux come from SteamOS). Catppuccin Mocha theming for bat, delta, fzf, lazygit, and btop.
 - **Languages & containers** — uv, Go, a Podman + dind Docker/Swarm testing stack (`dswarm`/`mtest`/`docker`+`podman` shims — box-aware, work from host and inside the `dev` container), and a distrobox `dev` container supplying `gcc` for CGO / `go test -race` (`cc-in-box` wrapper).
 - **KDE Plasma** — Catppuccin Mocha (Mauve) color scheme, dark wallpaper, bottom panel, Catppuccin window decorations + cursor, and Papirus-Dark icons. (KDE tasks run only on real hardware.)
+- **pianobar** — terminal Pandora client in its own distrobox container, exported to `~/.local/bin/pianobar` (audio via the shared PipeWire/Pulse sockets).
 
 Everything works within SteamOS's read-only rootfs: binaries to `~/.local/bin`, configs to `~/.config`, themes to `~/.local/share`. No `pacman`, no sudo.
 
@@ -21,6 +22,7 @@ Everything works within SteamOS's read-only rootfs: binaries to `~/.local/bin`, 
   * [Konsole](#konsole)
   * [Docker / dind](#docker--dind)
   * [Distrobox / dev container](#distrobox--dev-container)
+  * [pianobar](#pianobar)
   * [KDE Plasma](#kde-plasma)
 * [Dependencies](#dependencies)
 * [Tags](#tags)
@@ -105,6 +107,17 @@ The handiest knobs are below. See [`defaults/main.yml`](defaults/main.yml) for t
 cc-in-box go test -race ./...
 ```
 
+### pianobar
+
+| Variable | Default | Description |
+|---|---|---|
+| `pianobar_box_name` | `pianobar` | Distrobox container name for pianobar |
+| `pianobar_box_image` | `archlinux:latest` | Image used for the pianobar container |
+
+pianobar has no upstream binary releases and SteamOS ships no compiler, so it installs from Arch `[extra]` inside a dedicated distrobox container and is `distrobox-export`ed to `~/.local/bin/pianobar`. Audio works through the PipeWire/Pulse sockets distrobox shares with the host.
+
+The role does **not** manage `~/.config/pianobar/config` — it holds your Pandora credentials. Create it yourself; distrobox shares `$HOME`, so the host-side config is picked up inside the container.
+
 ### KDE Plasma
 
 | Variable | Default | Description |
@@ -140,6 +153,7 @@ ansible-playbook playbook.yml --skip-tags steamdeck:docker,steamdeck:distrobox
 | `steamdeck:podman` | Rootless podman socket |
 | `steamdeck:docker` | Docker/dind stack |
 | `steamdeck:distrobox` | Distrobox `dev` container |
+| `steamdeck:pianobar` | pianobar container + exported binary |
 | `steamdeck:kde` | KDE Plasma theming |
 
 ## Example Playbook
