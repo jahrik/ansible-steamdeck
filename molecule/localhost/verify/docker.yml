@@ -17,6 +17,15 @@
   ansible.builtin.assert:
     that: docker_cli_bin.stat.exists
 
+- name: Check podman-compose binary exists
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['user_dir'] }}/.local/bin/podman-compose"
+  register: podman_compose_bin
+
+- name: Assert podman-compose is installed
+  ansible.builtin.assert:
+    that: podman_compose_bin.stat.exists
+
 - name: Check dind container is running
   ansible.builtin.command: podman ps --filter name=dind --filter status=running --quiet
   register: dind_running

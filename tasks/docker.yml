@@ -63,6 +63,19 @@
         dest: "{{ ansible_facts['user_dir'] }}/.local/bin/podman"
         mode: '0755'
 
+    - name: Check if podman-compose is installed via uv
+      ansible.builtin.command:
+        cmd: "{{ ansible_facts['user_dir'] }}/.local/bin/uv tool list"
+      register: uv_tool_list
+      changed_when: false
+      check_mode: false
+
+    - name: Install podman-compose via uv
+      ansible.builtin.command:
+        cmd: "{{ ansible_facts['user_dir'] }}/.local/bin/uv tool install podman-compose=={{ podman_compose_version }}"
+      when: "'podman-compose' not in uv_tool_list.stdout"
+      changed_when: true
+
     - name: Deploy dswarm wrapper
       ansible.builtin.template:
         src: dswarm.j2
@@ -162,6 +175,12 @@
       ansible.builtin.file:
         path: "{{ ansible_facts['user_dir'] }}/.local/bin/docker-cli"
         state: absent
+
+    - name: Remove podman-compose via uv
+      ansible.builtin.command:
+        cmd: "{{ ansible_facts['user_dir'] }}/.local/bin/uv tool uninstall podman-compose"
+      changed_when: true
+      failed_when: false
 
     - name: Remove docker shim
       ansible.builtin.file:

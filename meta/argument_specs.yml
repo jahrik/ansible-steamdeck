@@ -157,6 +157,10 @@ argument_specs:
         type: str
         default: tcp://127.0.0.1:2375
         description: Docker host used by dswarm and docker-cli checks (loopback only)
+      podman_compose_version:
+        type: str
+        default: "1.6.0"
+        description: podman-compose release version (installed via uv tool install)
       distrobox_dev_name:
         type: str
         default: dev
