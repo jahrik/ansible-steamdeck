@@ -91,8 +91,9 @@ The handiest knobs are below. See [`defaults/main.yml`](defaults/main.yml) for t
 |---|---|---|
 | `docker_cli_version` | `29.5.3` | docker-cli static binary version |
 | `dind_host` | `tcp://127.0.0.1:2375` | Docker host URL used by dswarm/docker-cli |
+| `podman_compose_version` | `1.6.0` | podman-compose release version (installed via `uv tool install`) |
 
-`~/.local/bin/docker` and `~/.local/bin/podman` are box-aware shims: inside the `dev` distrobox (detected via `CONTAINER_ID`) both forward to the host engine via `distrobox-host-exec`. On the host they behave normally — `docker` execs `podman`, `podman` execs `/usr/bin/podman` by absolute path. One engine (host podman/dind) serves both contexts.
+`~/.local/bin/docker` and `~/.local/bin/podman` are box-aware shims: inside the `dev` distrobox (detected via `CONTAINER_ID`) both forward to the host engine via `distrobox-host-exec`. On the host they behave normally — `docker` execs `podman`, `podman` execs `/usr/bin/podman` by absolute path. One engine (host podman/dind) serves both contexts. `podman-compose` (installed via `uv tool install` alongside the other uv-managed tools) supplies the `docker compose`/`podman compose` provider.
 
 ### Distrobox / dev container
 
