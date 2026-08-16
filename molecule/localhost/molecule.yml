@@ -7,8 +7,6 @@ platforms:
   - name: localhost
 provisioner:
   name: ansible
-  connection_options:
-    ansible_connection: local
   inventory:
     hosts:
       all:
@@ -16,9 +14,9 @@ provisioner:
           dind_host: tcp://127.0.0.1:2375
           distrobox_dev_name: dev
           pianobar_box_name: pianobar
-        hosts:
-          localhost:
-            ansible_connection: local
-            ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    host_vars:
+      localhost:
+        ansible_connection: local
+        ansible_python_interpreter: "{{ ansible_playbook_python }}"
 verifier:
   name: ansible
