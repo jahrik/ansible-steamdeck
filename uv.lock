@@ -81,9 +81,9 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ansible-core", specifier = ">=2.21.2,<2.22" },
-    { name = "ansible-lint", specifier = ">=26.6.0" },
-    { name = "molecule", specifier = ">=26.6.0" },
+    { name = "ansible-core", specifier = ">=2.21.3,<2.22" },
+    { name = "ansible-lint", specifier = ">=26.8.0" },
+    { name = "molecule", specifier = ">=26.8.0" },
     { name = "molecule-plugins", extras = ["docker"], specifier = ">=26.7.15" },
     { name = "yamllint", specifier = ">=1.38.0" },
 ]
