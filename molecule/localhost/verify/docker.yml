@@ -45,3 +45,34 @@
   ansible.builtin.assert:
     that: swarm_state.stdout == 'active'
     fail_msg: "Docker Swarm is not initialized (state: {{ swarm_state.stdout }})"
+
+- name: Check dind container has a restart policy
+  ansible.builtin.command: podman inspect dind --format '{{ '{{' }}.HostConfig.RestartPolicy.Name{{ '}}' }}'
+  register: dind_restart_policy
+  changed_when: false
+
+- name: Assert dind container restarts on boot
+  ansible.builtin.assert:
+    that: dind_restart_policy.stdout == 'always'
+    fail_msg: "dind container has no restart=always policy, it will not survive a reboot"
+
+- name: Check lingering is enabled for the user
+  ansible.builtin.stat:
+    path: "/var/lib/systemd/linger/{{ ansible_facts['user_id'] }}"
+  register: linger_check
+
+- name: Assert lingering is enabled
+  ansible.builtin.assert:
+    that: linger_check.stat.exists
+    fail_msg: "lingering is not enabled, user services will not start at boot without a login"
+
+- name: Check podman-restart user service is enabled
+  ansible.builtin.command: systemctl --user is-enabled podman-restart.service
+  register: podman_restart_enabled
+  changed_when: false
+  failed_when: false
+
+- name: Assert podman-restart user service is enabled
+  ansible.builtin.assert:
+    that: podman_restart_enabled.stdout == 'enabled'
+    fail_msg: "podman-restart.service is not enabled, restart=always containers will not be reapplied at boot"

@@ -16,3 +16,25 @@
         scope: user
         enabled: true
         state: started
+
+    # Rootless podman has no persistent daemon, so containers with
+    # --restart=always are only re-applied at boot by this user unit; without
+    # it a reboot leaves them stopped even though the container still exists.
+    - name: Enable podman-restart user service
+      ansible.builtin.systemd:
+        name: podman-restart.service
+        scope: user
+        enabled: true
+
+    # A user's systemd instance (and thus podman-restart.service) only starts
+    # at boot, without requiring an interactive login, when lingering is on.
+    - name: Check if lingering is enabled
+      ansible.builtin.stat:
+        path: "/var/lib/systemd/linger/{{ ansible_facts['user_id'] }}"
+      register: linger_enabled
+
+    - name: Enable lingering so user services start at boot without login
+      ansible.builtin.command:
+        cmd: "loginctl enable-linger {{ ansible_facts['user_id'] }}"
+      changed_when: true
+      when: not linger_enabled.stat.exists

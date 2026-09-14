@@ -106,6 +106,7 @@
         cmd: >
           podman run -d
           --name {{ dind_name }}
+          --restart=always
           --privileged
           --network=host
           -e DOCKER_TLS_CERTDIR=
