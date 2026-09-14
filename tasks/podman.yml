@@ -28,6 +28,10 @@
 
     # A user's systemd instance (and thus podman-restart.service) only starts
     # at boot, without requiring an interactive login, when lingering is on.
+    #
+    # Enabling your OWN lingering maps to polkit's set-self-linger action
+    # (allow_any: yes), not set-user-linger (which needs admin auth), so this
+    # works under the role's become:false, verified via a real converge.
     - name: Check if lingering is enabled
       ansible.builtin.stat:
         path: "/var/lib/systemd/linger/{{ ansible_facts['user_id'] }}"
@@ -38,3 +42,40 @@
         cmd: "loginctl enable-linger {{ ansible_facts['user_id'] }}"
       changed_when: true
       when: not linger_enabled.stat.exists
+
+    # Marks lingering as role-managed so teardown only disables it when this
+    # role turned it on, never lingering the user already had enabled.
+    - name: Record that this role enabled lingering
+      ansible.builtin.file:
+        path: "{{ ansible_facts['user_dir'] }}/.config/.steamdeck-role-enabled-linger"
+        state: touch
+        mode: '0644'
+      when: not linger_enabled.stat.exists
+
+- name: Teardown podman reboot-persistence settings
+  when:
+    - not (install | default(true) | bool)
+    - ansible_facts['distribution_release'] == 'holo'
+  block:
+    - name: Disable podman-restart user service
+      ansible.builtin.systemd:
+        name: podman-restart.service
+        scope: user
+        enabled: false
+      failed_when: false
+
+    - name: Check if this role enabled lingering
+      ansible.builtin.stat:
+        path: "{{ ansible_facts['user_dir'] }}/.config/.steamdeck-role-enabled-linger"
+      register: role_enabled_linger
+
+    - name: Disable lingering (only if this role enabled it)
+      ansible.builtin.command:
+        cmd: "loginctl disable-linger {{ ansible_facts['user_id'] }}"
+      changed_when: true
+      when: role_enabled_linger.stat.exists
+
+    - name: Remove lingering marker
+      ansible.builtin.file:
+        path: "{{ ansible_facts['user_dir'] }}/.config/.steamdeck-role-enabled-linger"
+        state: absent
